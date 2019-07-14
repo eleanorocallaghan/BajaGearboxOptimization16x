@@ -25,8 +25,12 @@ values = num2cell([20 40 30 60]);
 [objarray.pitchDiameter] = values{:};
 [objarray.pressureAngle] = deal(20);
 [objarray.gearThickness] = deal(0.5);
+[objarray.materialName] = deal(4130); %FIX MEEEE
 
 % initialize constant factors
+for i = 1:4
+    objarray(i) = getMaterialProperties(objarray(i));
+end
 [objarray.overloadFactor] = deal(1.5);
 [objarray.rimThicknessFactor] = deal(1);
 [objarray.profileShiftFactor] = deal(1); %FIX MEEEEE
@@ -39,8 +43,41 @@ values = num2cell([30*(10^6), 2300, 30*(10^6), 2300]);
 % calculate "dynamic" factors
 for i = 1:4
     objarray(i) = calcDynamicFactor(objarray(i));
-    objarray(i) = calcLoadDistribFactor(objarray(i));
     objarray(i) = calcLewisFactor(objarray(i));
+end
+
+% calculate load distribution factors
+for i = 1:2:3 % only for A1 and B2 (pinions)
+    Cmc = 1; % face load distribution factor for uncrowned teeth
+    if (objarray(i).gearThickness/(10*objarray(i).pitchDiameter)) < 0.05
+        value = 0.05;
+    else
+        value = objarray(i).gearThickness/(10*objarray(i).pitchDiameter);
+    end
+    Cpf = (value)-0.025;
+    Cpm = 1; % for straddle mounted pinion w/out significant offset on shaft
+    A = 0.127; % for commercial, enclosed gearboxes
+    B = 0.0158; % ^
+    C = (-0.93)*(10^(-4)); % ^
+    Cma = A + B*objarray(i).gearThickness + C*(objarray(i).gearThickness)^2;
+    Ce = 1; % for gearing not adjusted at assembly
+    objarray(i).loadDistribFactor = 1 + Cmc*(Cpf*Cpm + Cma*Ce);
+end
+for i = 2:2:4 % only for B1 and C1 (gears), done differently because they need to use pinion pitch diameters
+    Cmc = 1; % face load distribution factor for uncrowned teeth
+    if (objarray(i).gearThickness/(10*objarray(i-1).pitchDiameter)) < 0.05
+        value = 0.05;
+    else
+        value = objarray(i).gearThickness/(10*objarray(i-1).pitchDiameter);
+    end
+    Cpf = (value)-0.025;
+    Cpm = 1; % for straddle mounted pinion w/out significant offset on shaft
+    A = 0.127; % for commercial, enclosed gearboxes
+    B = 0.0158; % ^
+    C = (-0.93)*(10^(-4)); % ^
+    Cma = A + B*objarray(i).gearThickness + C*(objarray(i).gearThickness)^2;
+    Ce = 1; % for gearing not adjusted at assembly
+    objarray(i).loadDistribFactor = 1 + Cmc*(Cpf*Cpm + Cma*Ce);
 end
 
 % calculate calculated stuff
@@ -71,7 +108,7 @@ gearBox.ratio = (B1.numTeeth/A1.numTeeth)*(C1.numTeeth/B2.numTeeth);
 % total KE
 gearBox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.kineticEnergy;
 
-matrixOfPossibilities(1, :) = [gearBox.ratio, gearBox.totalKE, ...
+matrixOfPossibilities = [gearBox.ratio, gearBox.totalKE, ...
     A1.bendingStress, B1.bendingStress, B2.bendingStress, ...
     C1.bendingStress, A1.contactStress, B1.contactStress, ...
     B2.contactStress, C1.contactStress]

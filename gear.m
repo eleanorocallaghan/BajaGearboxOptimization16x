@@ -2,6 +2,7 @@ classdef gear < handle
     
     properties
         % material properties
+        materialName
         density
         hardness
         % optimized values
@@ -39,6 +40,10 @@ classdef gear < handle
     
     methods
         function obj = gear()
+        end
+        
+        function obj = getMaterialProperties(obj)
+            [obj.density, obj.hardness] = materialOptions(obj.materialName);
         end
         
         function obj = calcModule(obj)
@@ -85,11 +90,15 @@ classdef gear < handle
         
         function obj = calcDynamicFactor(obj)
             calcPitchLineVelocity(obj);
-            obj.dynamicFactor = (1200 + obj.pitchLineVelocity)/1200;
-        end
-        
-        function obj = calcLoadDistribFactor(obj)
-            obj.loadDistribFactor = 2; % FIX MEEEEE
+            Qv = 7; % AGMA transmission accuracy level number for baja-type gears
+            B = 0.25*((12-Qv)^(2/3));
+            A = 50+56*(1-B);
+            calculatedDynamicFactor = ((A+sqrt(obj.pitchLineVelocity))/A)^B;
+            if calculatedDynamicFactor > 1
+                obj.dynamicFactor = calculatedDynamicFactor;
+            else
+                obj.dynamicFactor = 1;
+            end
         end
         
         function obj = calcDiametralPitch(obj)
@@ -97,23 +106,22 @@ classdef gear < handle
         end
         
         function obj = calcLewisFactor(obj)
-            %{
-            obj.module = obj.pitchDiameter/obj.numTeeth; %pitch diameter in mm
-            %obj.toothWidth = ((pi/2)+2*obj.profileShiftFactor*tand(obj.pressureAngle)*obj.module);
+            
+%             obj.module = obj.pitchDiameter/obj.numTeeth; %pitch diameter in mm
+%             obj.toothWidth = ((pi/2)+2*obj.profileShiftFactor*tand(obj.pressureAngle)*obj.module);
             obj.toothWidth = pi*(obj.module)*0.5;
             obj.toothDepth = 2.25*(obj.module);
-            obj.diametralPitch = obj.numTeeth/(obj.pitchDiameter); %pitch diameter in
-            %obj.lewisFactor = (2*((obj.toothWidth^2)/(4*obj.toothDepth))*obj.diametralPitch)/3;
-            obj.lewisFactor = (obj.toothWidth*obj.diametralPitch)/(6*obj.toothDepth);
-            %}
+%             obj.diametralPitch = obj.numTeeth/(obj.pitchDiameter); %pitch diameter in
+%             obj.lewisFactor = (2*((obj.toothWidth^2)/(4*obj.toothDepth))*obj.diametralPitch)/3;
+%             obj.lewisFactor = (obj.toothWidth*obj.diametralPitch)/(6*obj.toothDepth);
+            
             obj.lewisFactor = calcLewisFactorTables(obj);
         end
         
         function obj = calcBendingStress(obj)
             calcTangentLoad(obj);
-            calcdiametralPitch(obj);
+            calcDiametralPitch(obj);
             calcLewisFactor(obj);
-            calcloadDistribFactor(obj);
             calcDynamicFactor(obj);
             obj.bendingStress = ((obj.tangentLoad*obj.diametralPitch)/...
                 (obj.lewisFactor*obj.gearThickness))*obj.overloadFactor*...
@@ -123,7 +131,6 @@ classdef gear < handle
         function obj = calcContactStress(obj)
             calcTangentLoad(obj);
             calcDynamicFactor(obj);
-            calcloadDistribFactor(obj);
             obj.contactStress = obj.elasticCoefficient*sqrt(obj.tangentLoad*...
                 obj.overloadFactor*obj.dynamicFactor*obj.sizeFactor*...
                 (obj.loadDistribFactor/(obj.pitchDiameter*...

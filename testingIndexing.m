@@ -4,16 +4,20 @@ for i = 1:4
 end
 
 %assigning the same value to each object. Use deal:
-[objarray.pitchLineVelocity] = deal(0.5);
+%[objarray.pitchLineVelocity] = deal(0.5);
 
 %assigning different values to each object. 
 %Convert array of values to cell array, then convert cell array to comma-separated list:
-values = num2cell([1 2 3 4]);
-[objarray.pitchDiameter] = values{:};
 
+[objarray(1).pitchDiameter] = 40000;
+objarray(1)
+
+
+%{
 for i = 1:4
 objarray(i) = calcDynamicFactor(objarray(i));
 end
+%}
 
 %{
 %add a constant to each property. 
