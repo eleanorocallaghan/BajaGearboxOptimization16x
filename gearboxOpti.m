@@ -19,8 +19,10 @@ for i = 1:4
 end
 
 % initialize "input" values for gears
-[objarray.numTeeth] = num2cell([15 41 21 55]);
-[objarray.pitchDiameter] = num2cell([20 40 30 60]);
+values = num2cell([15 41 21 55]);
+[objarray.numTeeth] = values{:};
+values = num2cell([20 40 30 60]);
+[objarray.pitchDiameter] = values{:};
 [objarray.pressureAngle] = deal(20);
 [objarray.gearThickness] = deal(0.5);
 
@@ -31,7 +33,8 @@ end
 [objarray.sizeFactor] = deal(1);
 [objarray.surfaceConditionFactor] = deal(1);
 [objarray.geometryFactor] = deal(1); %FIX MEEEEE
-[objarray.elasticCoefficient] = num2cell([30*(10^6), 2300, 30*(10^6), 2300]);
+values = num2cell([30*(10^6), 2300, 30*(10^6), 2300]);
+[objarray.elasticCoefficient] = values{:};
 
 % calculate "dynamic" factors
 for i = 1:4
@@ -43,8 +46,6 @@ end
 % calculate calculated stuff
 for i = 1:4
     objarray(i) = calcModule(objarray(i));
-    objarray(i) = calcToothWidth(objarray(i));
-    objarray(i) = calcToothDepth(objarray(i));
     objarray(i) = calcMass(objarray(i));
     objarray(i) = calcTorque(objarray(i));
     objarray(i) = calcTangentLoad(objarray(i));

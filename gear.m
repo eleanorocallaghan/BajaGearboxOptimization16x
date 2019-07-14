@@ -41,6 +41,10 @@ classdef gear < handle
         function obj = gear()
         end
         
+        function obj = calcModule(obj)
+            obj.module = 4; % FIX MEEEEEE
+        end
+        
         function obj = calcMass(obj)
             obj.mass = obj.density * pi * (obj.pitchDiameter/2)^2 * obj.gearThickness;
         end
@@ -65,7 +69,9 @@ classdef gear < handle
             obj.dynamicFactor = (1200 + obj.pitchLineVelocity)/1200;
         end
         
-        calcLoadDistribFactor
+        function obj = calcLoadDistribFactor(obj)
+            obj.loadDistribFactor = 2; % FIX MEEEEE
+        end
         
         function obj = calcDiametralPitch(obj)
             obj.diametralPitch = obj.numTeeth/obj.pitchDiameter;
@@ -81,7 +87,7 @@ classdef gear < handle
             %obj.lewisFactor = (2*((obj.toothWidth^2)/(4*obj.toothDepth))*obj.diametralPitch)/3;
             obj.lewisFactor = (obj.toothWidth*obj.diametralPitch)/(6*obj.toothDepth);
             %}
-            obj.lewisFactor = calcLewisFactor(obj.pressureAngle, obj.numTeeth);
+            obj.lewisFactor = calcLewisFactorTables(obj);
         end
         
         function obj = calcBendingStress(obj)
