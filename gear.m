@@ -49,23 +49,42 @@ classdef gear < handle
             obj.mass = obj.density * pi * (obj.pitchDiameter/2)^2 * obj.gearThickness;
         end
         
+        function obj = calcTorque(obj)
+            obj.torque = 3800; %FIX MEEEEE
+        end
+        
         function obj = calcTangentLoad(obj)
+            calcTorque(obj)
+            calcDiametralPitch(obj);
             obj.tangentLoad = obj.torque/(obj.diametralPitch/2);
         end
         
         function obj = calcMomentOfInertia(obj)
+            calcMass(obj);
             obj.momentOfInertia = 0.5 * obj.mass * (obj.pitchDiameter/2)^2;
         end
         
+        function obj = calcAngVelocity(obj)
+            obj.angVelocity = 14; %FIX MEEEE
+        end
+        
+        function obj = calcGearSpeed(obj)
+            obj.gearSpeed = 3; %FIX MEEEEE
+        end
+        
         function obj = calcKineticEnergy(obj)
+            calcMomentOfInertia(obj);
+            calcAngVelocity(obj);
             obj.kineticEnergy = 0.5 * obj.momentOfInertia * (obj.angVelocity)^2;
         end
         
         function obj = calcPitchLineVelocity(obj)
+            calcGearSpeed(obj);
             obj.pitchLineVelocity = (pi*obj.pitchDiameter*obj.gearSpeed)/12; % (ft/min)
         end
         
         function obj = calcDynamicFactor(obj)
+            calcPitchLineVelocity(obj);
             obj.dynamicFactor = (1200 + obj.pitchLineVelocity)/1200;
         end
         
@@ -91,12 +110,20 @@ classdef gear < handle
         end
         
         function obj = calcBendingStress(obj)
+            calcTangentLoad(obj);
+            calcdiametralPitch(obj);
+            calcLewisFactor(obj);
+            calcloadDistribFactor(obj);
+            calcDynamicFactor(obj);
             obj.bendingStress = ((obj.tangentLoad*obj.diametralPitch)/...
                 (obj.lewisFactor*obj.gearThickness))*obj.overloadFactor*...
                 obj.loadDistribFactor*obj.dynamicFactor*obj.rimThicknessFactor;
         end
         
         function obj = calcContactStress(obj)
+            calcTangentLoad(obj);
+            calcDynamicFactor(obj);
+            calcloadDistribFactor(obj);
             obj.contactStress = obj.elasticCoefficient*sqrt(obj.tangentLoad*...
                 obj.overloadFactor*obj.dynamicFactor*obj.sizeFactor*...
                 (obj.loadDistribFactor/(obj.pitchDiameter*...

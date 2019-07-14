@@ -1,4 +1,4 @@
-function [gearbox, A1, B1, B2, C1] = gearboxOpti ()
+function [gearBox, A1, B1, B2, C1] = gearboxOpti ()
 
 %{
  min and max values
@@ -63,17 +63,17 @@ A1 = objarray(1);
 B1 = objarray(2);
 B2 = objarray(3);
 C1 = objarray(4);
-gearBox = gearbox(A1, B1, B2, C1);
+gearBox = gearbox;
 
 % overall ratio calculation
-gearbox.ratio = (B1.numTeeth/A1.numTeeth)*(C1.numTeeth/B2.numTeeth);
+gearBox.ratio = (B1.numTeeth/A1.numTeeth)*(C1.numTeeth/B2.numTeeth);
 
 % total KE
-gearbox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.kineticEnergy;
+gearBox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.kineticEnergy;
 
-matrixOfPossibilities(1, :) = [gearbox.ratio, gearbox.totalKE, ...
+matrixOfPossibilities(1, :) = [gearBox.ratio, gearBox.totalKE, ...
     A1.bendingStress, B1.bendingStress, B2.bendingStress, ...
     C1.bendingStress, A1.contactStress, B1.contactStress, ...
-    B2.contactStress, C1.contactStress];
+    B2.contactStress, C1.contactStress]
 
 end
