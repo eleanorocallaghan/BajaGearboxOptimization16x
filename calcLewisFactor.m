@@ -1,4 +1,6 @@
-function [lewisFactor] = calcLewisFactor(pressureAngle, numTeeth)
+function [lewisFactor] = calcLewisFactor(obj)
+pressureAngle = obj.pressureAngle;
+numTeeth = obj.numTeeth;
     if pressureAngle == 14.5
         lewisTable = [10, 0.176;...
                   11, 0.192;...  
