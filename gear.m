@@ -23,6 +23,7 @@ classdef gear < handle
         diametralPitch
         gearSpeed
         bendingStress
+        contactStress
         % factors
         lewisFactor %calculated
         dynamicFactor %calculated
@@ -33,7 +34,7 @@ classdef gear < handle
         sizeFactor
         surfaceConditionFactor
         geometryFactor
-        velocityFactor
+        elasticCoefficient
     end
     
     methods
@@ -64,16 +65,14 @@ classdef gear < handle
             obj.dynamicFactor = (1200 + obj.pitchLineVelocity)/1200;
         end
         
-        function obj = calcVelocityFactor(obj)
-            obj.velocityFactor = 6/(6+obj.pitchLineVelocity); 
-            % from https://nptel.ac.in/courses/112106137/pdf/2_7.pdf (pg 6)
-        end
+        calcLoadDistribFactor
         
         function obj = calcDiametralPitch(obj)
             obj.diametralPitch = obj.numTeeth/obj.pitchDiameter;
         end
         
         function obj = calcLewisFactor(obj)
+            %{
             obj.module = obj.pitchDiameter/obj.numTeeth; %pitch diameter in mm
             %obj.toothWidth = ((pi/2)+2*obj.profileShiftFactor*tand(obj.pressureAngle)*obj.module);
             obj.toothWidth = pi*(obj.module)*0.5;
@@ -81,12 +80,21 @@ classdef gear < handle
             obj.diametralPitch = obj.numTeeth/(obj.pitchDiameter); %pitch diameter in
             %obj.lewisFactor = (2*((obj.toothWidth^2)/(4*obj.toothDepth))*obj.diametralPitch)/3;
             obj.lewisFactor = (obj.toothWidth*obj.diametralPitch)/(6*obj.toothDepth);
+            %}
+            obj.lewisFactor = calcLewisFactor(obj.pressureAngle, obj.numTeeth);
         end
         
         function obj = calcBendingStress(obj)
             obj.bendingStress = ((obj.tangentLoad*obj.diametralPitch)/...
                 (obj.lewisFactor*obj.gearThickness))*obj.overloadFactor*...
                 obj.loadDistribFactor*obj.dynamicFactor*obj.rimThicknessFactor;
+        end
+        
+        function obj = calcContactStress(obj)
+            obj.contactStress = obj.elasticCoefficient*sqrt(obj.tangentLoad*...
+                obj.overloadFactor*obj.dynamicFactor*obj.sizeFactor*...
+                (obj.loadDistribFactor/(obj.pitchDiameter*...
+                obj.gearThickness))*(obj.surfaceConditionFactor/obj.geometryFactor));
         end
   
     end
