@@ -25,9 +25,12 @@ values = num2cell([20 40 30 60]);
 [objarray.pitchDiameter] = values{:};
 [objarray.pressureAngle] = deal(20);
 [objarray.gearThickness] = deal(0.5);
-[objarray.density] = deal(4); %FIX MEEEE
+[objarray.materialName] = deal(4130); %FIX MEEEE
 
 % initialize constant factors
+for i = 1:4
+    objarray(i) = getMaterialProperties(objarray(i));
+end
 [objarray.overloadFactor] = deal(1.5);
 [objarray.rimThicknessFactor] = deal(1);
 [objarray.profileShiftFactor] = deal(1); %FIX MEEEEE
@@ -43,7 +46,8 @@ for i = 1:4
     objarray(i) = calcLewisFactor(objarray(i));
 end
 
-for i = 1:2:3 % only for A1 and B2
+% calculate load distribution factors
+for i = 1:2:3 % only for A1 and B2 (pinions)
     Cmc = 1; % face load distribution factor for uncrowned teeth
     if (objarray(i).gearThickness/(10*objarray(i).pitchDiameter)) < 0.05
         value = 0.05;
@@ -55,10 +59,29 @@ for i = 1:2:3 % only for A1 and B2
     A = 0.127; % for commercial, enclosed gearboxes
     B = 0.0158; % ^
     C = (-0.93)*(10^(-4)); % ^
-    Cma = A + B*objarray(i).gearThickness + C*objarray(i).gearThickness^2;
+    Cma = A + B*objarray(i).gearThickness + C*(objarray(i).gearThickness)^2;
     Ce = 1; % for gearing not adjusted at assembly
-    obj.loadDistribFactor = 1 + Cmc*(Cpf*Cpm + Cma*Ce);
+    objarray(i).loadDistribFactor = 1 + Cmc*(Cpf*Cpm + Cma*Ce);
 end
+for i = 2:2:4 % only for B1 and C1 (gears), done differently because they need to use pinion pitch diameters
+    Cmc = 1; % face load distribution factor for uncrowned teeth
+    if (objarray(i).gearThickness/(10*objarray(i-1).pitchDiameter)) < 0.05
+        value = 0.05;
+    else
+        value = objarray(i).gearThickness/(10*objarray(i-1).pitchDiameter);
+    end
+    Cpf = (value)-0.025;
+    Cpm = 1; % for straddle mounted pinion w/out significant offset on shaft
+    A = 0.127; % for commercial, enclosed gearboxes
+    B = 0.0158; % ^
+    C = (-0.93)*(10^(-4)); % ^
+    Cma = A + B*objarray(i).gearThickness + C*(objarray(i).gearThickness)^2;
+    Ce = 1; % for gearing not adjusted at assembly
+    objarray(i).loadDistribFactor = 1 + Cmc*(Cpf*Cpm + Cma*Ce);
+end
+
+% calculate geometry factor
+for i 
 
 % calculate calculated stuff
 for i = 1:4

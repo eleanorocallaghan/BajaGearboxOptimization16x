@@ -80,6 +80,17 @@ for i = 2:2:4 % only for B1 and C1 (gears), done differently because they need t
     objarray(i).loadDistribFactor = 1 + Cmc*(Cpf*Cpm + Cma*Ce);
 end
 
+gearBox = gearbox;
+
+% overall ratio calculation
+gearBox.ratio = (objarray(2).numTeeth/objarray(1).numTeeth)*(objarray(4).numTeeth/objarray(3).numTeeth);
+
+% calculate geometry factor
+for i = 1:4
+    objarray(i).geometryFactor = ((cosd(objarray(i).pressureAngle)*...
+        sind(objarray(i).pressureAngle))/2)*(gearBox.ratio/(gearBox.ratio + 1)); 
+end
+
 % calculate calculated stuff
 for i = 1:4
     objarray(i) = calcModule(objarray(i));
@@ -100,10 +111,6 @@ A1 = objarray(1);
 B1 = objarray(2);
 B2 = objarray(3);
 C1 = objarray(4);
-gearBox = gearbox;
-
-% overall ratio calculation
-gearBox.ratio = (B1.numTeeth/A1.numTeeth)*(C1.numTeeth/B2.numTeeth);
 
 % total KE
 gearBox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.kineticEnergy;

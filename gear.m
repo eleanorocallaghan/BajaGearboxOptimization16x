@@ -3,7 +3,7 @@ classdef gear < handle
     properties
         % material properties
         materialName
-        density
+        density % 
         hardness
         % optimized values
         numTeeth
