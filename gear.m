@@ -5,6 +5,10 @@ classdef gear < handle
         materialName
         density % 
         hardness
+        % facts of life
+        numPittingLoadCycles
+        numFatigueLoadCycles
+        numLoadApplication
         % optimized values
         numTeeth
         pitchDiameter
@@ -22,9 +26,15 @@ classdef gear < handle
         kineticEnergy
         pitchLineVelocity
         diametralPitch
-        gearSpeed
+        gearSpeed %rpm
         bendingStress
         contactStress
+        bendingFatigueLimit
+        contactFatigueLimit
+        bendingStressLifetime
+        contactStressLifetime
+        allowableBendingStress
+        allowableContactStress
         % factors
         lewisFactor %calculated
         dynamicFactor %calculated
@@ -34,8 +44,16 @@ classdef gear < handle
         profileShiftFactor
         sizeFactor
         surfaceConditionFactor
-        geometryFactor
+        bendingGeometryFactor
+        pittingGeometryFactor
         elasticCoefficient
+        bendingStressCycleFactor
+        pittingStressCycleFactor
+        hardnessRatioFactor
+        bendingSafetyFactor
+        pittingSafetyFactor
+        temperatureFactor
+        reliabilityFactor
     end
     
     methods
@@ -136,6 +154,7 @@ classdef gear < handle
                 (obj.loadDistribFactor/(obj.pitchDiameter*...
                 obj.gearThickness))*(obj.surfaceConditionFactor/obj.geometryFactor));
         end
+        
   
     end
     

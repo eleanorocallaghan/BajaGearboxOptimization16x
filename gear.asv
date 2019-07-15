@@ -3,8 +3,12 @@ classdef gear < handle
     properties
         % material properties
         materialName
-        density
+        density % 
         hardness
+        % facts of life
+        numPittingLoadCycles
+        numFatigueLoadCycles
+        numLoadApplication
         % optimized values
         numTeeth
         pitchDiameter
@@ -22,9 +26,12 @@ classdef gear < handle
         kineticEnergy
         pitchLineVelocity
         diametralPitch
-        gearSpeed
+        gearSpeed %rpm
         bendingStress
         contactStress
+        b
+        bendingStressLifetime
+        contactStressLifetime
         % factors
         lewisFactor %calculated
         dynamicFactor %calculated
@@ -43,8 +50,8 @@ classdef gear < handle
         end
         
         function obj = getMaterialProperties(obj)
-            [obj.density, obj.hardness] = materialOptions(materialName)
-            
+            [obj.density, obj.hardness] = materialOptions(obj.materialName);
+        end
         
         function obj = calcModule(obj)
             obj.module = 4; % FIX MEEEEEE
