@@ -5,55 +5,57 @@ classdef gear < handle
         materialName
         density % 
         hardness
+        bendingFatigueLimit %MPa
+        contactFatigueLimit %MPa
         % facts of life
         numPittingLoadCycles
         numFatigueLoadCycles
         numLoadApplication
         % optimized values
         numTeeth
-        pitchDiameter
-        pressureAngle
-        gearThickness
-        % calculated values
+        pitchDiameter %in
+        pressureAngle %deg
+        gearThickness %in
+        % values calculated in this program
         module
-        toothWidth
-        toothDepth
-        mass
+        toothWidth %in
+        toothDepth %in
+        mass %lb
         torque
         tangentLoad
         momentOfInertia
-        angVelocity
+        angVelocity %deg/sec
         kineticEnergy
         pitchLineVelocity
         diametralPitch
         gearSpeed %rpm
         bendingStress
         contactStress
-        bendingFatigueLimit
-        contactFatigueLimit
-        bendingStressLifetime
-        contactStressLifetime
-        allowableBendingStress
-        allowableContactStress
-        % factors
-        lewisFactor %calculated
-        dynamicFactor %calculated
+        % values calculated in optimization program
+        bendingStressLifetime %hours
+        contactStressLifetime %hours
+        allowableBendingStress %MPa
+        allowableContactStress %MPa
+        % static factors (all unitless)
         overloadFactor
         loadDistribFactor
         rimThicknessFactor
         profileShiftFactor
         sizeFactor
         surfaceConditionFactor
-        bendingGeometryFactor
-        pittingGeometryFactor
         elasticCoefficient
-        bendingStressCycleFactor
-        pittingStressCycleFactor
-        hardnessRatioFactor
         bendingSafetyFactor
         pittingSafetyFactor
         temperatureFactor
         reliabilityFactor
+        % calculated factors (all unitless)
+        dynamicFactor % calculated in this program
+        lewisFactor % calculated from tables in another program
+        bendingGeometryFactor
+        pittingGeometryFactor
+        bendingStressCycleFactor
+        pittingStressCycleFactor
+        hardnessRatioFactor
     end
     
     methods
@@ -65,7 +67,7 @@ classdef gear < handle
         end
         
         function obj = calcModule(obj)
-            obj.module = 4; % FIX MEEEEEE
+            obj.module = obj.pitchDiameter/obj.numTeeth;
         end
         
         function obj = calcMass(obj)
@@ -87,12 +89,12 @@ classdef gear < handle
             obj.momentOfInertia = 0.5 * obj.mass * (obj.pitchDiameter/2)^2;
         end
         
-        function obj = calcAngVelocity(obj)
-            obj.angVelocity = 14; %FIX MEEEE
-        end
-        
         function obj = calcGearSpeed(obj)
             obj.gearSpeed = 3; %FIX MEEEEE
+        end
+        
+        function obj = calcAngVelocity(obj)
+            obj.angVelocity = obj.gearSpeed*6;
         end
         
         function obj = calcKineticEnergy(obj)
@@ -124,7 +126,6 @@ classdef gear < handle
         end
         
         function obj = calcLewisFactor(obj)
-            
 %             obj.module = obj.pitchDiameter/obj.numTeeth; %pitch diameter in mm
 %             obj.toothWidth = ((pi/2)+2*obj.profileShiftFactor*tand(obj.pressureAngle)*obj.module);
             obj.toothWidth = pi*(obj.module)*0.5;
@@ -152,7 +153,7 @@ classdef gear < handle
             obj.contactStress = obj.elasticCoefficient*sqrt(obj.tangentLoad*...
                 obj.overloadFactor*obj.dynamicFactor*obj.sizeFactor*...
                 (obj.loadDistribFactor/(obj.pitchDiameter*...
-                obj.gearThickness))*(obj.surfaceConditionFactor/obj.geometryFactor));
+                obj.gearThickness))*(obj.surfaceConditionFactor/obj.pittingGeometryFactor));
         end
         
   
