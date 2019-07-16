@@ -3,13 +3,11 @@ classdef gear < handle
     properties
         % material properties
         materialName
-        density % 
-        hardness
+        density %lb/in^3
         bendingFatigueLimit %MPa
         contactFatigueLimit %MPa
+        hardness %unitless
         % facts of life
-        numPittingLoadCycles
-        numFatigueLoadCycles
         numLoadApplication
         % optimized values
         numTeeth
@@ -17,25 +15,27 @@ classdef gear < handle
         pressureAngle %deg
         gearThickness %in
         % values calculated in this program
-        module
+        module %in
         toothWidth %in
         toothDepth %in
         mass %lb
-        torque
-        tangentLoad
-        momentOfInertia
+        tangentLoad %lb
+        momentOfInertia %lbin^2
         angVelocity %deg/sec
-        kineticEnergy
-        pitchLineVelocity
-        diametralPitch
-        gearSpeed %rpm
-        bendingStress
-        contactStress
+        kineticEnergy %lbin
+        pitchLineVelocity %in/sec
+        diametralPitch %in^-1
+        bendingStress %psi
+        contactStress %psi
         % values calculated in optimization program
+        gearSpeed %rpm
+        torque %lbin
         bendingStressLifetime %hours
         contactStressLifetime %hours
         allowableBendingStress %MPa
         allowableContactStress %MPa
+        numPittingLoadCycles
+        numFatigueLoadCycles
         % static factors (all unitless)
         overloadFactor
         loadDistribFactor
@@ -74,12 +74,7 @@ classdef gear < handle
             obj.mass = obj.density * pi * (obj.pitchDiameter/2)^2 * obj.gearThickness;
         end
         
-        function obj = calcTorque(obj)
-            obj.torque = 3800; %FIX MEEEEE
-        end
-        
         function obj = calcTangentLoad(obj)
-            calcTorque(obj)
             calcDiametralPitch(obj);
             obj.tangentLoad = obj.torque/(obj.diametralPitch/2);
         end
@@ -87,10 +82,6 @@ classdef gear < handle
         function obj = calcMomentOfInertia(obj)
             calcMass(obj);
             obj.momentOfInertia = 0.5 * obj.mass * (obj.pitchDiameter/2)^2;
-        end
-        
-        function obj = calcGearSpeed(obj)
-            obj.gearSpeed = 3; %FIX MEEEEE
         end
         
         function obj = calcAngVelocity(obj)
@@ -104,8 +95,7 @@ classdef gear < handle
         end
         
         function obj = calcPitchLineVelocity(obj)
-            calcGearSpeed(obj);
-            obj.pitchLineVelocity = (pi*obj.pitchDiameter*obj.gearSpeed)/12; % (ft/min)
+            obj.pitchLineVelocity = (pi*obj.pitchDiameter*obj.gearSpeed);
         end
         
         function obj = calcDynamicFactor(obj)

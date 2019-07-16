@@ -3,59 +3,58 @@ classdef gear < handle
     properties
         % material properties
         materialName
-        density % 
-        hardness
-        bendingFatigueLimit
-        contactFatigueLimit
+        density
+        bendingFatigueLimit %MPa
+        contactFatigueLimit %MPa
         % facts of life
         numPittingLoadCycles
         numFatigueLoadCycles
         numLoadApplication
         % optimized values
         numTeeth
-        pitchDiameter
-        pressureAngle
-        gearThickness
+        pitchDiameter %in
+        pressureAngle %deg
+        gearThickness %in
         % values calculated in this program
-        module
-        toothWidth
-        toothDepth
-        mass
-        torque
-        tangentLoad
-        momentOfInertia
-        angVelocity
+        module %in
+        toothWidth %in
+        toothDepth %in
+        mass %lb
+        tangentLoad %lb
+        momentOfInertia %lbin^2
+        angVelocity %deg/sec
         kineticEnergy
         pitchLineVelocity
         diametralPitch
-        gearSpeed %rpm
         bendingStress
         contactStress
         % values calculated in optimization program
-        bendingStressLifetime
-        contactStressLifetime
-        allowableBendingStress
-        allowableContactStress
-        % static factors
+        gearSpeed %rpm
+        torque %lbin
+        bendingStressLifetime %hours
+        contactStressLifetime %hours
+        allowableBendingStress %MPa
+        allowableContactStress %MPa
+        % static factors (all unitless)
         overloadFactor
         loadDistribFactor
         rimThicknessFactor
         profileShiftFactor
         sizeFactor
         surfaceConditionFactor
-        bendingGeometryFactor
-        pittingGeometryFactor
         elasticCoefficient
-        
-        lewisFactor %calculated
-        dynamicFactor %calculated
-        bendingStressCycleFactor % calculated
-        pittingStressCycleFactor % calculated
-        hardnessRatioFactor
         bendingSafetyFactor
         pittingSafetyFactor
         temperatureFactor
         reliabilityFactor
+        % calculated factors (all unitless)
+        dynamicFactor % calculated in this program
+        lewisFactor % calculated from tables in another program
+        bendingGeometryFactor
+        pittingGeometryFactor
+        bendingStressCycleFactor
+        pittingStressCycleFactor
+        hardnessRatioFactor
     end
     
     methods
@@ -67,19 +66,14 @@ classdef gear < handle
         end
         
         function obj = calcModule(obj)
-            obj.module = 4; % FIX MEEEEEE
+            obj.module = obj.pitchDiameter/obj.numTeeth;
         end
         
         function obj = calcMass(obj)
             obj.mass = obj.density * pi * (obj.pitchDiameter/2)^2 * obj.gearThickness;
         end
         
-        function obj = calcTorque(obj)
-            obj.torque = 3800; %FIX MEEEEE
-        end
-        
         function obj = calcTangentLoad(obj)
-            calcTorque(obj)
             calcDiametralPitch(obj);
             obj.tangentLoad = obj.torque/(obj.diametralPitch/2);
         end
@@ -90,11 +84,7 @@ classdef gear < handle
         end
         
         function obj = calcAngVelocity(obj)
-            obj.angVelocity = 14; %FIX MEEEE
-        end
-        
-        function obj = calcGearSpeed(obj)
-            obj.gearSpeed = 3; %FIX MEEEEE
+            obj.angVelocity = obj.gearSpeed*6;
         end
         
         function obj = calcKineticEnergy(obj)
@@ -104,7 +94,6 @@ classdef gear < handle
         end
         
         function obj = calcPitchLineVelocity(obj)
-            calcGearSpeed(obj);
             obj.pitchLineVelocity = (pi*obj.pitchDiameter*obj.gearSpeed)/12; % (ft/min)
         end
         
@@ -126,7 +115,6 @@ classdef gear < handle
         end
         
         function obj = calcLewisFactor(obj)
-            
 %             obj.module = obj.pitchDiameter/obj.numTeeth; %pitch diameter in mm
 %             obj.toothWidth = ((pi/2)+2*obj.profileShiftFactor*tand(obj.pressureAngle)*obj.module);
             obj.toothWidth = pi*(obj.module)*0.5;
