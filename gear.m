@@ -4,8 +4,8 @@ classdef gear < handle
         % material properties
         materialName
         density %lb/in^3
-        bendingFatigueLimit %MPa
-        contactFatigueLimit %MPa
+        bendingFatigueLimit %psi
+        contactFatigueLimit %psi
         hardness %unitless
         % facts of life
         numLoadApplication
@@ -16,6 +16,7 @@ classdef gear < handle
         gearThickness %in
         % values calculated in this program
         module %in
+        pitch %pi
         toothWidth %in
         toothDepth %in
         mass %lb
@@ -32,8 +33,8 @@ classdef gear < handle
         torque %lbin
         bendingStressLifetime %hours
         contactStressLifetime %hours
-        allowableBendingStress %MPa
-        allowableContactStress %MPa
+        allowableBendingStress %psi
+        allowableContactStress %psi
         numPittingLoadCycles
         numFatigueLoadCycles
         % static factors (all unitless)
@@ -43,7 +44,7 @@ classdef gear < handle
         profileShiftFactor
         sizeFactor
         surfaceConditionFactor
-        elasticCoefficient
+        elasticCoefficient %sqrt(psi)
         bendingSafetyFactor
         pittingSafetyFactor
         temperatureFactor
@@ -54,7 +55,7 @@ classdef gear < handle
         bendingGeometryFactor
         pittingGeometryFactor
         bendingStressCycleFactor
-        pittingStressCycleFactor
+        pittingStressCycleFactor % calculated in optimization program
         hardnessRatioFactor
     end
     
@@ -68,6 +69,11 @@ classdef gear < handle
         
         function obj = calcModule(obj)
             obj.module = obj.pitchDiameter/obj.numTeeth;
+        end
+        
+        function obj = calcPitch(obj)
+            calcModule(obj);
+            obj.pitch = obj.module*pi;
         end
         
         function obj = calcMass(obj)
@@ -95,7 +101,7 @@ classdef gear < handle
         end
         
         function obj = calcPitchLineVelocity(obj)
-            obj.pitchLineVelocity = (pi*obj.pitchDiameter*obj.gearSpeed);
+            obj.pitchLineVelocity = (pi*obj.pitchDiameter*obj.gearSpeed*60);
         end
         
         function obj = calcDynamicFactor(obj)
@@ -103,7 +109,7 @@ classdef gear < handle
             Qv = 7; % AGMA transmission accuracy level number for baja-type gears
             B = 0.25*((12-Qv)^(2/3));
             A = 50+56*(1-B);
-            calculatedDynamicFactor = ((A+sqrt(obj.pitchLineVelocity))/A)^B;
+            calculatedDynamicFactor = ((A+sqrt(obj.pitchLineVelocity/60))/A)^B;
             if calculatedDynamicFactor > 1
                 obj.dynamicFactor = calculatedDynamicFactor;
             else

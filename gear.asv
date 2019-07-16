@@ -3,12 +3,11 @@ classdef gear < handle
     properties
         % material properties
         materialName
-        density
-        bendingFatigueLimit %MPa
-        contactFatigueLimit %MPa
+        density %lb/in^3
+        bendingFatigueLimit %psi
+        contactFatigueLimit %psi
+        hardness %unitless
         % facts of life
-        numPittingLoadCycles
-        numFatigueLoadCycles
         numLoadApplication
         % optimized values
         numTeeth
@@ -23,18 +22,20 @@ classdef gear < handle
         tangentLoad %lb
         momentOfInertia %lbin^2
         angVelocity %deg/sec
-        kineticEnergy
-        pitchLineVelocity
-        diametralPitch
-        bendingStress
-        contactStress
+        kineticEnergy %lbin
+        pitchLineVelocity %in/sec
+        diametralPitch %in^-1
+        bendingStress %psi
+        contactStress %psi
         % values calculated in optimization program
         gearSpeed %rpm
         torque %lbin
         bendingStressLifetime %hours
         contactStressLifetime %hours
-        allowableBendingStress %MPa
-        allowableContactStress %MPa
+        allowableBendingStress %psi
+        allowableContactStress %psi
+        numPittingLoadCycles
+        numFatigueLoadCycles
         % static factors (all unitless)
         overloadFactor
         loadDistribFactor
@@ -42,7 +43,7 @@ classdef gear < handle
         profileShiftFactor
         sizeFactor
         surfaceConditionFactor
-        elasticCoefficient
+        elasticCoefficient %sqrt(psi)
         bendingSafetyFactor
         pittingSafetyFactor
         temperatureFactor
@@ -90,11 +91,11 @@ classdef gear < handle
         function obj = calcKineticEnergy(obj)
             calcMomentOfInertia(obj);
             calcAngVelocity(obj);
-            obj.kineticEnergy = 0.5 * obj.momentOfInertia * (obj.angVelocity)^2;
+            obj.kineticEnergy = 0.5 * obj.momentOfInertia * ((obj.angVelocity)^2;
         end
         
         function obj = calcPitchLineVelocity(obj)
-            obj.pitchLineVelocity = (pi*obj.pitchDiameter*obj.gearSpeed)/12; % (ft/min)
+            obj.pitchLineVelocity = (pi*obj.pitchDiameter*obj.gearSpeed);
         end
         
         function obj = calcDynamicFactor(obj)
