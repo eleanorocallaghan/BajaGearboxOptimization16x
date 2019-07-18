@@ -1,29 +1,19 @@
 function [gearBox, A1, B1, B2, C1] = gearboxOpti ()
 
-%{
- min and max values
-minGearThickness = 0.2;
-maxGearThickness = 2;
-minPitchDiameter = 1.5;
-maxPitchDiameter = 8;
-minRatio = 2;
-maxRatio = 7;
-idealContactRatio = 1.5;
-%}
-
 % make a matrix of gears
 for i = 1:4
   objarray(i) = gear;
 end
 
-% initialize "input" values for gears
+% initialize optimized values for gears
 values = num2cell([15 41 21 55]);
 [objarray.numTeeth] = values{:};
-values = num2cell([3 4.5 2.5 5]);
-[objarray.pitchDiameter] = values{:};
+[objarray.diametralPitch] = deal(8);
 [objarray.pressureAngle] = deal(20);
 [objarray.gearThickness] = deal(0.5);
 [objarray.materialName] = deal(4150); %FIX MEEEE
+
+% initialize gearbox stuff
 gearBox = gearbox;
 gearBox.inputSpeed = 3800;
 gearBox.inputTorque = 14.5*12*3.8;
@@ -128,7 +118,7 @@ for i = 1:4
     objarray(i) = calcAngVelocity(objarray(i));
     objarray(i) = calcKineticEnergy(objarray(i));
     objarray(i) = calcPitchLineVelocity(objarray(i));
-    objarray(i) = calcDiametralPitch(objarray(i));
+    objarray(i) = calcPitchDiameter(objarray(i));
     objarray(i) = calcBendingStress(objarray(i));
     objarray(i) = calcContactStress(objarray(i));
 end

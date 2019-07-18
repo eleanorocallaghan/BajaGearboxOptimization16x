@@ -11,7 +11,7 @@ classdef gear < handle
         numLoadApplication
         % optimized values
         numTeeth
-        pitchDiameter %in
+        diametralPitch %in^-1
         pressureAngle %deg
         gearThickness %in
         % values calculated in this program
@@ -25,7 +25,7 @@ classdef gear < handle
         angVelocity %deg/sec
         kineticEnergy %lbin
         pitchLineVelocity %in/sec
-        diametralPitch %in^-1
+        pitchDiameter %in
         bendingStress %psi
         contactStress %psi
         % values calculated in optimization program
@@ -68,6 +68,7 @@ classdef gear < handle
         end
         
         function obj = calcModule(obj)
+            calcPitchDiameter(obj);
             obj.module = obj.pitchDiameter/obj.numTeeth;
         end
         
@@ -77,16 +78,17 @@ classdef gear < handle
         end
         
         function obj = calcMass(obj)
+            calcPitchDiameter(obj);
             obj.mass = obj.density * pi * (obj.pitchDiameter/2)^2 * obj.gearThickness;
         end
         
         function obj = calcTangentLoad(obj)
-            calcDiametralPitch(obj);
             obj.tangentLoad = obj.torque/(obj.diametralPitch/2);
         end
         
         function obj = calcMomentOfInertia(obj)
             calcMass(obj);
+            calcPitchDiameter(obj)
             obj.momentOfInertia = 0.5 * obj.mass * (obj.pitchDiameter/2)^2;
         end
         
@@ -101,6 +103,7 @@ classdef gear < handle
         end
         
         function obj = calcPitchLineVelocity(obj)
+            calcPitchDiameter(obj);
             obj.pitchLineVelocity = (pi*obj.pitchDiameter*obj.gearSpeed*60);
         end
         
@@ -117,8 +120,8 @@ classdef gear < handle
             end
         end
         
-        function obj = calcDiametralPitch(obj)
-            obj.diametralPitch = obj.numTeeth/obj.pitchDiameter;
+        function obj = calcPitchDiameter(obj)
+            obj.pitchDiameter = obj.numTeeth/obj.diametralPitch;
         end
         
         function obj = calcLewisFactor(obj)
@@ -135,7 +138,6 @@ classdef gear < handle
         
         function obj = calcBendingStress(obj)
             calcTangentLoad(obj);
-            calcDiametralPitch(obj);
             calcLewisFactor(obj);
             calcDynamicFactor(obj);
             obj.bendingStress = ((obj.tangentLoad*obj.diametralPitch)/...
@@ -146,6 +148,7 @@ classdef gear < handle
         function obj = calcContactStress(obj)
             calcTangentLoad(obj);
             calcDynamicFactor(obj);
+            calcPitchDiameter(obj);
             obj.contactStress = obj.elasticCoefficient*sqrt(obj.tangentLoad*...
                 obj.overloadFactor*obj.dynamicFactor*obj.sizeFactor*...
                 (obj.loadDistribFactor/(obj.pitchDiameter*...
