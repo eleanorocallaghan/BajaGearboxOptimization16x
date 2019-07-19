@@ -1,15 +1,17 @@
-function [teethOptions, pressureAngleOptions, allDiametralPitchOptions] = Optimization()
+function [] = Optimization()
 
 % min and max values
 minNumTeeth = 10;
-maxNumTeeth = 80;
+maxNumTeeth = 75;
 minIndividualRatio = 2.6;
 maxIndividualRatio = 4;
 minOverallRatio = 7.05;
 maxOverallRatio = 7.15;
-minPitchDiameter = 2;
-maxPitchDiameter = 8;
-maxGearThickness = 2;
+minPitchDiameter = 2; %in
+maxPitchDiameter = 8; %in
+maxGearThickness = 1; %in
+thicknessIncrement = 0.05; %in
+idealLifetime = 50; %hours
 
 % generate possible combinations of teeth
 % find all combinations of teeth numbers
@@ -32,6 +34,14 @@ for i = 1:size(allcombos, 1)
     end
 end
 
+% remove combinations that aren't coprime
+for i = 1:size(A1B1options, 1)
+    if iscoprime(A1B1options(i, :)) ~= 1
+        A1B1options(i, :) = 0;
+    end
+end
+A1B1options = [nonzeros(A1B1options(:, 1)), nonzeros(A1B1options(:, 2))];
+
 % find combinations of 4 gears that give desired overall gearbox reduction
 count3 = 1;
 for i = 1:size(A1B1options, 1)
@@ -48,7 +58,7 @@ for i = 1:size(A1B1options, 1)
 end
 
 % possible pressure angles
-pressureAngleOptions = [14, 20, 25];
+pressureAngleOptions = [14; 20; 25];
 
 % generate possible diametral pitches
 count4 = 1;
@@ -59,14 +69,40 @@ for i = 1:size(teethOptions, 1)
         count4 = count4 + 1;
     end
 end
+allDiametralPitchOptions = round(allDiametralPitchOptions, 1);
+diametralPitchOptions = unique(sort(allDiametralPitchOptions, 2), 'rows');
+
 count5 = 1;
-for i = 1:allDiametralPitchOptions(end)
-    for j = 1:allDiametralPitchOptions(end)
-        if abs(allDiametralPitchOptions(i)-allDiametralPitchOptions(j)) > 1
-            diametralPitchOptions(count5, 1) = allDiametralPitchOptions(i);
+for i = 1:size(teethOptions, 1)
+    for j = 1:size(pressureAngleOptions, 1)
+        for k = 1:size(diametralPitchOptions, 1)
+            for m = 1:4
+                gearSizes(m) = teethOptions(i, m)/diametralPitchOptions(k);
+            end
+            gear
+            if max(gearSizes) > maxPitchDiameter || min(gearSizes) < minPitchDiameter
+                possibleGearBox = 0;
+            else
+                gearThickness = maxGearThickness;
+                possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
+            end
+            calculations = gearboxOpti(possibleGearBox);
             count5 = count5 + 1;
+            if calculations ~= 0
+                while calculations(3) > idealLifetime
+                    possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness-thicknessIncrement];
+                    calculations = gearboxOpti(possibleGearBox);
+                end
+                gearThickness = gearThickness + thicknessIncrement;
+                kineticEnergies(count6) = calculations(2);
+                combination(count6) = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
+            end
         end
     end
 end
+
+clf(figure(1))
+figure(1)
+plot(combination(7), kineticEnergies)
 
 end

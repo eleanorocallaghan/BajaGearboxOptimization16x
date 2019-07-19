@@ -1,29 +1,25 @@
-function [gearBox, A1, B1, B2, C1] = gearboxOpti ()
+function [calculations] = gearboxOpti (possibleGearbox)
 
-%{
- min and max values
-minGearThickness = 0.2;
-maxGearThickness = 2;
-minPitchDiameter = 1.5;
-maxPitchDiameter = 8;
-minRatio = 2;
-maxRatio = 7;
-idealContactRatio = 1.5;
-%}
+maxGearThickness = 1; %in
+
+if possibleGearbox == 0
+    calculations = [];
+end
 
 % make a matrix of gears
 for i = 1:4
   objarray(i) = gear;
 end
 
-% initialize "input" values for gears
-values = num2cell([15 41 21 55]);
+% initialize optimized values for gears
+values = num2cell(possibleGearbox(1:4));
 [objarray.numTeeth] = values{:};
-values = num2cell([3 4.5 2.5 5]);
-[objarray.pitchDiameter] = values{:};
-[objarray.pressureAngle] = deal(20);
-[objarray.gearThickness] = deal(0.5);
+[objarray.diametralPitch] = deal(possibleGearbox(6));
+[objarray.pressureAngle] = deal(possibleGearbox(5));
+[objarray.gearThickness] = deal(maxGearThickness);
 [objarray.materialName] = deal(4150); %FIX MEEEE
+
+% initialize gearbox stuff
 gearBox = gearbox;
 gearBox.inputSpeed = 3800;
 gearBox.inputTorque = 14.5*12*3.8;
@@ -121,14 +117,14 @@ end
 % calculate calculated stuff
 for i = 1:4
     objarray(i) = calcModule(objarray(i));
-    objarray(i) = calcPitch(o
+    objarray(i) = calcPitch(objarray(i));
     objarray(i) = calcMass(objarray(i));
     objarray(i) = calcTangentLoad(objarray(i));
     objarray(i) = calcMomentOfInertia(objarray(i));
     objarray(i) = calcAngVelocity(objarray(i));
     objarray(i) = calcKineticEnergy(objarray(i));
     objarray(i) = calcPitchLineVelocity(objarray(i));
-    objarray(i) = calcDiametralPitch(objarray(i));
+    objarray(i) = calcPitchDiameter(objarray(i));
     objarray(i) = calcBendingStress(objarray(i));
     objarray(i) = calcContactStress(objarray(i));
 end
@@ -185,9 +181,9 @@ end
 
 % calculate lifetimes
 for i = 1:4
-    objarray(i).bendingStressLifetime = objarray(i).numPittingLoadCycles/...
+    objarray(i).bendingStressLifetime = objarray(i).numFatigueLoadCycles/...
         (60*objarray(i).gearSpeed*objarray(i).numLoadApplication);
-    objarray(i).contactStressLifetime = objarray(i).numFatigueLoadCycles/...
+    objarray(i).contactStressLifetime = objarray(i).numPittingLoadCycles/...
         (60*objarray(i).gearSpeed*objarray(i).numLoadApplication);
 end
 
@@ -199,8 +195,7 @@ C1 = objarray(4);
 % total KE
 gearBox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.kineticEnergy;
 
-matrixOfPossibilities = [gearBox.ratio, A1.numTeeth, B1.numTeeth, ...
-    B2.numTeeth, C1.numTeeth, A1.pitchDiameter, B1.pitchDiameter, ...
-    B2.pitchDiameter, C1.pitchDiameter];
+
+calculations = [minGearThickness, gearBox.totalKE, gearBox.lifetime];
 
 end

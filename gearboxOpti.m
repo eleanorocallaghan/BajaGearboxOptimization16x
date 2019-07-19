@@ -1,4 +1,8 @@
-function [gearBox, A1, B1, B2, C1] = gearboxOpti ()
+function [calculations] = gearboxOpti (possibleGearbox)
+
+if possibleGearbox == 0
+    calculations = [];
+end
 
 % make a matrix of gears
 for i = 1:4
@@ -6,11 +10,11 @@ for i = 1:4
 end
 
 % initialize optimized values for gears
-values = num2cell([15 41 21 55]);
+values = num2cell(possibleGearbox(1:4));
 [objarray.numTeeth] = values{:};
-[objarray.diametralPitch] = deal(8);
-[objarray.pressureAngle] = deal(20);
-[objarray.gearThickness] = deal(0.5);
+[objarray.diametralPitch] = deal(possibleGearbox(6));
+[objarray.pressureAngle] = deal(possibleGearbox(5));
+[objarray.gearThickness] = deal(possibleGearbox(7));
 [objarray.materialName] = deal(4150); %FIX MEEEE
 
 % initialize gearbox stuff
@@ -189,8 +193,9 @@ C1 = objarray(4);
 % total KE
 gearBox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.kineticEnergy;
 
-matrixOfPossibilities = [gearBox.ratio, A1.numTeeth, B1.numTeeth, ...
-    B2.numTeeth, C1.numTeeth, A1.pitchDiameter, B1.pitchDiameter, ...
-    B2.pitchDiameter, C1.pitchDiameter];
+% find gearbox lifetime
+gearBox.lifetime = min([objarray.bendingStressLifetime, objarray.contactStressLifetime]);
+
+calculations = [gearThickness, gearBox.totalKE, gearBox.lifetime];
 
 end
