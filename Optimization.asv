@@ -11,7 +11,7 @@ minPitchDiameter = 2; %in
 maxPitchDiameter = 8; %in
 maxGearThickness = 1; %in
 thicknessIncrement = 0.05; %in
-idealLifetime = 50; %hour
+idealLifetime = 50; %hours
 
 % generate possible combinations of teeth
 % find all combinations of teeth numbers
@@ -58,7 +58,7 @@ for i = 1:size(A1B1options, 1)
 end
 
 % possible pressure angles
-pressureAngleOptions = [14; 20; 25];
+pressureAngleOptions = [14.5; 20; 25];
 
 % generate possible diametral pitches
 count4 = 1;
@@ -80,24 +80,26 @@ for i = 1:size(teethOptions, 1)
                 gearSizes(m) = teethOptions(i, m)/diametralPitchOptions(k);
             end
             gear
-            if max(gearSizes) > maxPitchDiameter || min(gearSizes) < minPitchDiameter
-                possibleGearBox = 0;
-            else
+            if (max(gearSizes) < maxPitchDiameter) && (min(gearSizes) > minPitchDiameter)
                 gearThickness = maxGearThickness;
                 possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
-            end
-            calculations = gearboxOpti(possibleGearBox);
-            count5 = count5 + 1;
-            if calculations ~= 0
-                while calculations(3) > idealLifetime
+                calculations = gearboxOpti(possibleGearBox);
+                count5 = count5 + 1;
+                while calculations(2) > idealLifetime
                     possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness-thicknessIncrement];
                     calculations = gearboxOpti(possibleGearBox);
                 end
                 gearThickness = gearThickness + thicknessIncrement;
-                kineticEnergies =  
-                    
+                kineticEnergies(count5) = calculations(2);
+                combinations(count5) = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
+            end
         end
     end
-end    
+end
+
+
+clf(figure(1))
+figure(1)
+plot(combinations(7), kineticEnergies)
 
 end

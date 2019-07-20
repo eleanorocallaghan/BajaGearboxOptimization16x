@@ -5,6 +5,7 @@ classdef gearbox < handle
         totalKE
         inputSpeed %rpm
         inputTorque %lbin
+        lifetime
     end
     
     methods

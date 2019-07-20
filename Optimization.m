@@ -1,4 +1,4 @@
-function [] = Optimization()
+function [kineticEnergies, combinations] = Optimization()
 
 % min and max values
 minNumTeeth = 10;
@@ -58,7 +58,7 @@ for i = 1:size(A1B1options, 1)
 end
 
 % possible pressure angles
-pressureAngleOptions = [14; 20; 25];
+pressureAngleOptions = [14.5; 20; 25];
 
 % generate possible diametral pitches
 count4 = 1;
@@ -80,29 +80,29 @@ for i = 1:size(teethOptions, 1)
                 gearSizes(m) = teethOptions(i, m)/diametralPitchOptions(k);
             end
             gear
-            if max(gearSizes) > maxPitchDiameter || min(gearSizes) < minPitchDiameter
-                possibleGearBox = 0;
-            else
+            if (max(gearSizes) < maxPitchDiameter) && (min(gearSizes) > minPitchDiameter)
                 gearThickness = maxGearThickness;
                 possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
-            end
-            calculations = gearboxOpti(possibleGearBox);
-            count5 = count5 + 1;
-            if calculations ~= 0
-                while calculations(3) > idealLifetime
-                    possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness-thicknessIncrement];
-                    calculations = gearboxOpti(possibleGearBox);
+                calculations = gearboxOpti(possibleGearBox);
+                if calculations(2)>idealLifetime
+                    while calculations(2) > idealLifetime
+                        possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness-thicknessIncrement];
+                        calculations = gearboxOpti(possibleGearBox);
+                    end
+                    gearThickness = gearThickness + thicknessIncrement;
+                    kineticEnergies(count5, :) = calculations(1);
+                    combinations(count5, :) = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
+                    count5 = count5 + 1;
                 end
-                gearThickness = gearThickness + thicknessIncrement;
-                kineticEnergies(count6) = calculations(2);
-                combination(count6) = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
             end
         end
     end
 end
 
+%{
 clf(figure(1))
 figure(1)
-plot(combination(7), kineticEnergies)
+plot(combinations(7), kineticEnergies)
+%}
 
 end

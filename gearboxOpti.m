@@ -1,9 +1,5 @@
 function [calculations] = gearboxOpti (possibleGearbox)
 
-if possibleGearbox == 0
-    calculations = [];
-end
-
 % make a matrix of gears
 for i = 1:4
   objarray(i) = gear;
@@ -196,6 +192,6 @@ gearBox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.ki
 % find gearbox lifetime
 gearBox.lifetime = min([objarray.bendingStressLifetime, objarray.contactStressLifetime]);
 
-calculations = [gearThickness, gearBox.totalKE, gearBox.lifetime];
+calculations = [gearBox.totalKE, gearBox.lifetime];
 
 end
