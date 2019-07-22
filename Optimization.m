@@ -87,7 +87,7 @@ for i = 1:size(teethOptions, 1)
                 if calculations(2)>idealLifetime
                     while calculations(2) > idealLifetime
                         possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness-thicknessIncrement];
-                        calculations = gearboxOpti(possibleGearBox);
+                        [A1, B1, B2, C1, gearBox, calculations] = gearboxOpti(possibleGearBox)
                     end
                     gearThickness = gearThickness + thicknessIncrement;
                     kineticEnergies(count5, :) = calculations(1);

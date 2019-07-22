@@ -1,4 +1,4 @@
-function [calculations] = gearboxOpti (possibleGearbox)
+function [A1, B1, B2, C1, gearBox, calculations] = gearboxOpti (possibleGearbox)
 
 % make a matrix of gears
 for i = 1:4
@@ -6,11 +6,11 @@ for i = 1:4
 end
 
 % initialize optimized values for gears
-values = num2cell(possibleGearbox(1:4));
+values = num2cell([21 44 24 55]);%possibleGearbox(1:4));
 [objarray.numTeeth] = values{:};
-[objarray.diametralPitch] = deal(possibleGearbox(6));
-[objarray.pressureAngle] = deal(possibleGearbox(5));
-[objarray.gearThickness] = deal(possibleGearbox(7));
+[objarray.diametralPitch] = deal(8.5);%possibleGearbox(6));
+[objarray.pressureAngle] = deal(14.5);%possibleGearbox(5));
+[objarray.gearThickness] = deal(0.5);%possibleGearbox(7));
 [objarray.materialName] = deal(4150); %FIX MEEEE
 
 % initialize gearbox stuff
@@ -27,10 +27,10 @@ end
 [objarray.profileShiftFactor] = deal(1); %FIX MEEEEE
 [objarray.sizeFactor] = deal(1);
 [objarray.surfaceConditionFactor] = deal(1);
-values = num2cell([30*(10^6), 2300, 30*(10^6), 2300]);
+values = num2cell([2484 2300 2484 2300]);%possibleGearbox(1:4));
 [objarray.elasticCoefficient] = values{:};
-[objarray.bendingSafetyFactor] = deal(1.7); % from website about fatigue life
-[objarray.pittingSafetyFactor] = deal(1.3); % from website about fatigue life
+[objarray.bendingSafetyFactor] = deal(1); % from website about fatigue life
+[objarray.pittingSafetyFactor] = deal(1); % from website about fatigue life
 [objarray.temperatureFactor] = deal(1); % unless we get more data
 [objarray.reliabilityFactor] = deal(1.25); % from website about fatigue life
 [objarray.bendingFatigueLimit] = deal(300000); %FIX MEEEE
@@ -134,9 +134,26 @@ for i = 1:2:3 % for A1 and B2 (pinions)
         objarray(i).temperatureFactor*objarray(i).reliabilityFactor)/...
         ((objarray(i).contactFatigueLimit/145.038)*objarray(i).hardnessRatioFactor));
 end
+A1elastcoeff = (objarray(1).elasticCoefficient/sqrt(145.038))
+A1tangentload = objarray(1).tangentLoad/0.224809
+A1qrttophalf = ((objarray(1).tangentLoad/0.224809)*objarray(1).overloadFactor*...
+        objarray(1).dynamicFactor*objarray(1).loadDistribFactor*...
+        objarray(1).sizeFactor*objarray(1).surfaceConditionFactor)
+A1thickness = objarray(1).gearThickness*25.4
+A1pitchDia = objarray(1).pitchDiameter*25.4
+    A1sqrtbottomhalf = (objarray(1).gearThickness*25.4)*(objarray(1).pitchDiameter*25.4)*...
+        objarray(1).pittingGeometryFactor
+A1pitcyclefacSqrt = sqrt(((objarray(1).tangentLoad/0.224809)*objarray(1).overloadFactor*...
+        objarray(1).dynamicFactor*objarray(1).loadDistribFactor*...
+        objarray(1).sizeFactor*objarray(1).surfaceConditionFactor)/...
+        ((objarray(1).gearThickness*25.4)*(objarray(1).pitchDiameter*25.4)*...
+        objarray(1).pittingGeometryFactor))
+A1pitcyclefacoutside = ((objarray(1).pittingSafetyFactor*...
+        objarray(1).temperatureFactor*objarray(1).reliabilityFactor)/...
+        ((objarray(1).contactFatigueLimit/145.038)*objarray(1).hardnessRatioFactor))
 for i = 2:2:4 % for B1 and C1 (gears)
     objarray(i).pittingStressCycleFactor = (objarray(i).elasticCoefficient/sqrt(145.038))*...
-        sqrt(((objarray(i).tangentLoad/0.224809)*objarray(i).overloadFactor*...
+        sqrt(((objarray(i).tangentLoad/2.22481)*objarray(i).overloadFactor*...
         objarray(i).dynamicFactor*objarray(i).loadDistribFactor*...
         objarray(i).sizeFactor*objarray(i).surfaceConditionFactor)/...
         ((objarray(i).gearThickness*25.4)*(objarray(i-1).pitchDiameter*25.4)*...
@@ -145,7 +162,7 @@ for i = 2:2:4 % for B1 and C1 (gears)
         ((objarray(i).contactFatigueLimit/145.038)*objarray(i).hardnessRatioFactor));
 end
 for i = 1:4
-    objarray(i).bendingStressCycleFactor = ((objarray(i).tangentLoad/0.224809)*...
+    objarray(i).bendingStressCycleFactor =((objarray(i).tangentLoad/0.224809)*...
         objarray(i).overloadFactor*objarray(i).dynamicFactor*...
         objarray(i).loadDistribFactor*objarray(i).sizeFactor*...
         objarray(i).rimThicknessFactor*objarray(i).bendingSafetyFactor*...

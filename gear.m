@@ -88,7 +88,7 @@ classdef gear < handle
         
         function obj = calcMomentOfInertia(obj)
             calcMass(obj);
-            calcPitchDiameter(obj)
+            calcPitchDiameter(obj);
             obj.momentOfInertia = 0.5 * obj.mass * (obj.pitchDiameter/2)^2;
         end
         
