@@ -12,7 +12,7 @@ values = num2cell(possibleGearbox(1:4));
 [objarray.diametralPitch] = deal(possibleGearbox(6));
 [objarray.pressureAngle] = deal(possibleGearbox(5));
 [objarray.gearThickness] = deal(possibleGearbox(7));
-[objarray.materialName] = deal(4150); %FIX MEEEE
+[objarray.materialName] = deal(61); %FIX MEEEE
 
 
 % % IF YOU WANT TO MANUALLY PUT STUFF IN
@@ -36,7 +36,7 @@ for i = 1:4
 end
 [objarray.overloadFactor] = deal(1.5);
 [objarray.rimThicknessFactor] = deal(1);
-[objarray.profileShiftFactor] = deal(1); %FIX MEEEEE
+[objarray.profileShiftFactor] = deal(0); %FIX MEEEEE
 [objarray.sizeFactor] = deal(1);
 [objarray.surfaceConditionFactor] = deal(1);
 values = num2cell([2484 2300 2484 2300]);
@@ -45,8 +45,8 @@ values = num2cell([2484 2300 2484 2300]);
 [objarray.pittingSafetyFactor] = deal(1); % from website about fatigue life
 [objarray.temperatureFactor] = deal(1); % unless we get more data
 [objarray.reliabilityFactor] = deal(1.25); % from website about fatigue life
-[objarray.bendingFatigueLimit] = deal(300000); %FIX MEEEE
-[objarray.contactFatigueLimit] = deal(250000); % a reasonable guess, should be fixed though
+[objarray.bendingFatigueLimit] = deal(objarray(1).ultimateTensile); %FIX MEEEE
+[objarray.contactFatigueLimit] = deal(objarray(1).ultimateTensile); % a reasonable guess, should be fixed though
 [objarray.numLoadApplication] = deal(1); % ^
 [objarray.bendingGeometryFactor] = deal(0.47); % this is an approximation, should probably be calculated
 
@@ -172,7 +172,7 @@ for i = 1:2:3 % for A1 and B2 (pinions)
         ((objarray(i).gearThickness*25.4)*(objarray(i).pitchDiameter*25.4)*...
         objarray(i).pittingGeometryFactor))*((objarray(i).pittingSafetyFactor*...
         objarray(i).temperatureFactor*objarray(i).reliabilityFactor)/...
-        ((objarray(i).contactFatigueLimit/145.038)*objarray(i).hardnessRatioFactor));
+        ((objarray(i).contactFatigueLimit/145.0376)*objarray(i).hardnessRatioFactor));
 end
 for i = 2:2:4 % for B1 and C1 (gears)
     objarray(i).pittingStressCycleFactor = (objarray(i).elasticCoefficient/sqrt(145.038))*...
@@ -190,7 +190,7 @@ for i = 1:4
         objarray(i).loadDistribFactor*objarray(i).sizeFactor*...
         objarray(i).rimThicknessFactor*objarray(i).bendingSafetyFactor*...
         objarray(i).temperatureFactor*objarray(i).reliabilityFactor)/...
-        ((objarray(i).bendingFatigueLimit/145.038)*(objarray(i).gearThickness*25.4)*...
+        ((objarray(i).bendingFatigueLimit/145.037)*(objarray(i).gearThickness*25.4)*...
         (objarray(i).module*25.4)*objarray(i).bendingGeometryFactor);
 end
 

@@ -3,7 +3,7 @@ function [topTwentyNoKE] = Optimization()
 % min and max values
 minNumTeeth = 10;
 maxNumTeeth = 75;
-minIndividualRatio = 2;
+minIndividualRatio = 1.5;
 maxIndividualRatio = 3;
 minOverallRatio = 7.05;
 maxOverallRatio = 7.15;
@@ -12,7 +12,7 @@ maxPitchDiameter = 8; %in
 maxGearThickness = 1; %in
 thicknessIncrement = 0.05; %in
 idealLifetime = 40; %hours
-minContactRatio = 1.1;
+minContactRatio = 1.125;
 
 % generate possible combinations of teeth
 % find all combinations of teeth numbers

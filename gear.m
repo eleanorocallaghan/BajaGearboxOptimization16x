@@ -7,6 +7,7 @@ classdef gear < handle
         bendingFatigueLimit %psi
         contactFatigueLimit %psi
         hardness %unitless
+        ultimateTensile %psi
         % facts of life (initialized in gearboxOpti)
         numLoadApplication
         % optimized values (generated/optimized in gearboxOpti and Optimization)
@@ -65,7 +66,7 @@ classdef gear < handle
         end
         
         function obj = getMaterialProperties(obj)
-            [obj.density, obj.hardness] = materialOptions(obj.materialName);
+            [obj.density, obj.hardness, obj.ultimateTensile] = materialOptions(obj.materialName);
         end
         
         function obj = calcModule(obj)
