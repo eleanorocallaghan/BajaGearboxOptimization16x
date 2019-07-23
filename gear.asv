@@ -1,17 +1,17 @@
 classdef gear < handle
     
     properties
-        % material properties
+        % material properties (in materialOptions)
         materialName
         density %lb/in^3
         bendingFatigueLimit %psi
         contactFatigueLimit %psi
         hardness %unitless
-        % facts of life
+        % facts of life (initialized in gearboxOpti)
         numLoadApplication
-        % optimized values
+        % optimized values (generated/optimized in gearboxOpti and Optimization)
         numTeeth
-        pitchDiameter %in
+        diametralPitch %in^-1
         pressureAngle %deg
         gearThickness %in
         % values calculated in this program
@@ -25,19 +25,20 @@ classdef gear < handle
         angVelocity %deg/sec
         kineticEnergy %lbin
         pitchLineVelocity %in/sec
-        diametralPitch %in^-1
+        pitchDiameter %in
         bendingStress %psi
         contactStress %psi
-        % values calculated in optimization program
+        % values calculated in gearboxOpti
         gearSpeed %rpm
         torque %lbin
+        contactRatio %unitless
         bendingStressLifetime %hours
         contactStressLifetime %hours
         allowableBendingStress %psi
         allowableContactStress %psi
         numPittingLoadCycles
         numFatigueLoadCycles
-        % static factors (all unitless)
+        % static factors (all unitless) (initialized in gearboxOpti)
         overloadFactor
         loadDistribFactor
         rimThicknessFactor
@@ -49,7 +50,7 @@ classdef gear < handle
         pittingSafetyFactor
         temperatureFactor
         reliabilityFactor
-        % calculated factors (all unitless)
+        % calculated factors (all unitless) (in gearboxOpti)
         dynamicFactor % calculated in this program
         lewisFactor % calculated from tables in another program
         bendingGeometryFactor
@@ -68,7 +69,7 @@ classdef gear < handle
         end
         
         function obj = calcModule(obj)
-            calc
+            calcPitchDiameter(obj);
             obj.module = obj.pitchDiameter/obj.numTeeth;
         end
         
@@ -88,7 +89,7 @@ classdef gear < handle
         
         function obj = calcMomentOfInertia(obj)
             calcMass(obj);
-            calcPitchDiameter(obj)
+            calcPitchDiameter(obj);
             obj.momentOfInertia = 0.5 * obj.mass * (obj.pitchDiameter/2)^2;
         end
         
@@ -138,7 +139,6 @@ classdef gear < handle
         
         function obj = calcBendingStress(obj)
             calcTangentLoad(obj);
-            calcDiametralPitch(obj);
             calcLewisFactor(obj);
             calcDynamicFactor(obj);
             obj.bendingStress = ((obj.tangentLoad*obj.diametralPitch)/...
@@ -149,6 +149,7 @@ classdef gear < handle
         function obj = calcContactStress(obj)
             calcTangentLoad(obj);
             calcDynamicFactor(obj);
+            calcPitchDiameter(obj);
             obj.contactStress = obj.elasticCoefficient*sqrt(obj.tangentLoad*...
                 obj.overloadFactor*obj.dynamicFactor*obj.sizeFactor*...
                 (obj.loadDistribFactor/(obj.pitchDiameter*...

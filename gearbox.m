@@ -1,11 +1,14 @@
 classdef gearbox < handle
     
     properties
-        ratio
-        totalKE
+        % given values, based on engine and CVT (initialized in
+        % gearboxOpti)
         inputSpeed %rpm
         inputTorque %lbin
-        lifetime
+        % calculated values (in gearboxOpti)
+        lifetime %hours
+        ratio
+        totalKE %lbin
     end
     
     methods

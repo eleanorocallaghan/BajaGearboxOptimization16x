@@ -10,8 +10,9 @@ maxOverallRatio = 7.15;
 minPitchDiameter = 2; %in
 maxPitchDiameter = 8; %in
 maxGearThickness = 1; %in
-thicknessIncrement = 0.05; %in
-idealLifetime = 50; %hours
+thicknessIncrement = 0.005; %in
+idealLifetime = 10; %hours
+minContactRatio = 1.1;
 
 % generate possible combinations of teeth
 % find all combinations of teeth numbers
@@ -73,26 +74,30 @@ allDiametralPitchOptions = round(allDiametralPitchOptions, 1);
 diametralPitchOptions = unique(sort(allDiametralPitchOptions, 2), 'rows');
 
 count5 = 1;
+totalTries = 1;
 for i = 1:size(teethOptions, 1)
     for j = 1:size(pressureAngleOptions, 1)
         for k = 1:size(diametralPitchOptions, 1)
             for m = 1:4
                 gearSizes(m) = teethOptions(i, m)/diametralPitchOptions(k);
             end
-            gear
             if (max(gearSizes) < maxPitchDiameter) && (min(gearSizes) > minPitchDiameter)
                 gearThickness = maxGearThickness;
                 possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
-                calculations = gearboxOpti(possibleGearBox);
-                if calculations(2)>idealLifetime
+                [A1, B1, B2, C1, gearBox, calculations] = gearboxOpti(possibleGearBox);
+                totalTries = totalTries + 1
+                if calculations(2)>idealLifetime && A1.contactRatio > minContactRatio && B2.contactRatio > minContactRatio
                     while calculations(2) > idealLifetime
-                        possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness-thicknessIncrement];
-                        [A1, B1, B2, C1, gearBox, calculations] = gearboxOpti(possibleGearBox)
+                        gearThickness = gearThickness-thicknessIncrement;
+                        possibleGearBox = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
+                        [A1, B1, B2, C1, gearBox, calculations] = gearboxOpti(possibleGearBox);
                     end
                     gearThickness = gearThickness + thicknessIncrement;
+                    if gearThickness < maxGearThickness
                     kineticEnergies(count5, :) = calculations(1);
                     combinations(count5, :) = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
                     count5 = count5 + 1;
+                    end
                 end
             end
         end

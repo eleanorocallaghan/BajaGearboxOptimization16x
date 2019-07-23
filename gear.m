@@ -1,15 +1,15 @@
 classdef gear < handle
     
     properties
-        % material properties
+        % material properties (in materialOptions)
         materialName
         density %lb/in^3
         bendingFatigueLimit %psi
         contactFatigueLimit %psi
         hardness %unitless
-        % facts of life
+        % facts of life (initialized in gearboxOpti)
         numLoadApplication
-        % optimized values
+        % optimized values (generated/optimized in gearboxOpti and Optimization)
         numTeeth
         diametralPitch %in^-1
         pressureAngle %deg
@@ -28,16 +28,17 @@ classdef gear < handle
         pitchDiameter %in
         bendingStress %psi
         contactStress %psi
-        % values calculated in optimization program
+        % values calculated in gearboxOpti
         gearSpeed %rpm
         torque %lbin
+        contactRatio %unitless
         bendingStressLifetime %hours
         contactStressLifetime %hours
         allowableBendingStress %psi
         allowableContactStress %psi
         numPittingLoadCycles
         numFatigueLoadCycles
-        % static factors (all unitless)
+        % static factors (all unitless) (initialized in gearboxOpti)
         overloadFactor
         loadDistribFactor
         rimThicknessFactor
@@ -49,7 +50,7 @@ classdef gear < handle
         pittingSafetyFactor
         temperatureFactor
         reliabilityFactor
-        % calculated factors (all unitless)
+        % calculated factors (all unitless) (in gearboxOpti)
         dynamicFactor % calculated in this program
         lewisFactor % calculated from tables in another program
         bendingGeometryFactor
