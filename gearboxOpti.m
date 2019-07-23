@@ -62,7 +62,7 @@ objarray(2).torque = objarray(1).torque/(objarray(1).numTeeth/objarray(2).numTee
 objarray(3).torque = objarray(2).torque;
 objarray(4).torque = objarray(3).torque/(objarray(3).numTeeth/objarray(4).numTeeth);
 
-% calculate "dynamic" factors
+% calculate calculated factors
 for i = 1:4
     objarray(i) = calcDynamicFactor(objarray(i));
     objarray(i) = calcLewisFactor(objarray(i));
@@ -232,6 +232,6 @@ gearBox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.ki
 % find gearbox lifetime
 gearBox.lifetime = min([objarray.bendingStressLifetime, objarray.contactStressLifetime]);
 
-calculations = [gearBox.totalKE, gearBox.lifetime];
+calculations = [gearBox.totalKE, gearBox.lifetime, A1.contactRatio, B2.contactRatio];
 
 end

@@ -2,7 +2,7 @@ function [density, hardness] = materialOptions(name)
 
 if name == 4150
     density = 0.284;
-    hardness = 630;
+    hardness = 197;
 elseif name == 9310
     density = 1;
     hardness = 1;

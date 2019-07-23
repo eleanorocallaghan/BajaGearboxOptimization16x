@@ -1,17 +1,17 @@
-function [kineticEnergies, combinations] = Optimization()
+function [topTwentyNoKE] = Optimization()
 
 % min and max values
 minNumTeeth = 10;
 maxNumTeeth = 75;
-minIndividualRatio = 2.6;
-maxIndividualRatio = 4;
+minIndividualRatio = 2;
+maxIndividualRatio = 3;
 minOverallRatio = 7.05;
 maxOverallRatio = 7.15;
 minPitchDiameter = 2; %in
 maxPitchDiameter = 8; %in
 maxGearThickness = 1; %in
-thicknessIncrement = 0.005; %in
-idealLifetime = 10; %hours
+thicknessIncrement = 0.05; %in
+idealLifetime = 40; %hours
 minContactRatio = 1.1;
 
 % generate possible combinations of teeth
@@ -95,7 +95,7 @@ for i = 1:size(teethOptions, 1)
                     gearThickness = gearThickness + thicknessIncrement;
                     if gearThickness < maxGearThickness
                     kineticEnergies(count5, :) = calculations(1);
-                    combinations(count5, :) = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness];
+                    combinations(count5, :) = [teethOptions(i, 1:4), pressureAngleOptions(j), diametralPitchOptions(k), gearThickness, A1.contactRatio, B2.contactRatio];
                     count5 = count5 + 1;
                     end
                 end
@@ -104,10 +104,20 @@ for i = 1:size(teethOptions, 1)
     end
 end
 
-%{
+combinations(:, 10) = kineticEnergies(:);
+[~,indx] = sort(combinations(:,10));
+sortedC = combinations(indx,:);
+topTwenty = sortedC(1:20, :);
+
 clf(figure(1))
 figure(1)
-plot(combinations(7), kineticEnergies)
-%}
+plot(min(topTwenty(:, 8), topTwenty(:, 9)), topTwenty(:, 10), 'o')
+title(sprintf('Top Twenty Optimized Gears with a %d Hour Lifetime', idealLifetime))
+xlabel('Minimum Contact Ratio')
+ylabel('Total KE (lbin)')
+labels = {'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'};
+text(min(topTwenty(:, 8), topTwenty(:, 9)),topTwenty(:, 10),labels,'VerticalAlignment','bottom','HorizontalAlignment','right')
+
+topTwentyNoKE = topTwenty(:, 1:9);
 
 end
