@@ -12,18 +12,17 @@ end
 % [objarray.diametralPitch] = deal(possibleGearbox(6));
 % [objarray.pressureAngle] = deal(possibleGearbox(5));
 % [objarray.gearThickness] = deal(possibleGearbox(7));
-% [objarray.materialName] = deal(4150); %FIX MEEEE
+% [objarray.materialName] = deal(61); %FIX MEEEE
 
 
 % IF YOU WANT TO MANUALLY PUT STUFF IN
 % initialize optimized values for gears
-values = num2cell([25 66 25 67]);
+values = num2cell([15  21 55]);
 [objarray.numTeeth] = values{:};
-[objarray.diametralPitch] = deal(12.4);
+[objarray.diametralPitch] = deal(12);
 [objarray.pressureAngle] = deal(25);
-[objarray.gearThickness] = deal(0.4);
-[objarray.materialName] = deal(4150); %FIX MEEEE
-
+[objarray.gearThickness] = deal(0.5);
+[objarray.materialName] = deal(9130); %FIX MEEEE
 
 
 % initialize gearbox stuff
@@ -37,7 +36,7 @@ for i = 1:4
 end
 [objarray.overloadFactor] = deal(1.5);
 [objarray.rimThicknessFactor] = deal(1);
-[objarray.profileShiftFactor] = deal(1); %FIX MEEEEE
+[objarray.profileShiftFactor] = deal(0); %FIX MEEEEE
 [objarray.sizeFactor] = deal(1);
 [objarray.surfaceConditionFactor] = deal(1);
 values = num2cell([2484 2300 2484 2300]);
@@ -46,8 +45,8 @@ values = num2cell([2484 2300 2484 2300]);
 [objarray.pittingSafetyFactor] = deal(1); % from website about fatigue life
 [objarray.temperatureFactor] = deal(1); % unless we get more data
 [objarray.reliabilityFactor] = deal(1.25); % from website about fatigue life
-[objarray.bendingFatigueLimit] = deal(300000); %FIX MEEEE
-[objarray.contactFatigueLimit] = deal(250000); % a reasonable guess, should be fixed though
+[objarray.bendingFatigueLimit] = deal(objarray(1).ultimateTensile); %FIX MEEEE
+[objarray.contactFatigueLimit] = deal(objarray(1).ultimateTensile); % a reasonable guess, should be fixed though
 [objarray.numLoadApplication] = deal(1); % ^
 [objarray.bendingGeometryFactor] = deal(0.47); % this is an approximation, should probably be calculated
 
@@ -63,7 +62,7 @@ objarray(2).torque = objarray(1).torque/(objarray(1).numTeeth/objarray(2).numTee
 objarray(3).torque = objarray(2).torque;
 objarray(4).torque = objarray(3).torque/(objarray(3).numTeeth/objarray(4).numTeeth);
 
-% calculate "dynamic" factors
+% calculate calculated factors
 for i = 1:4
     objarray(i) = calcDynamicFactor(objarray(i));
     objarray(i) = calcLewisFactor(objarray(i));
@@ -138,32 +137,30 @@ end
 
 % calculate contact ratios
 for i = 1:2 % for A1 and B1 set
-    pinionAddendumRadius = (objarray(1).pitchDiameter + objarray(1).module)/2
-    pinionBaseCircleRadius = (objarray(1).pitchDiameter*cosd(objarray(1).pressureAngle))/2
-    gearAddendumRadius = (objarray(2).pitchDiameter + objarray(2).module)/2
-    gearBaseCircleRadius = (objarray(2).pitchDiameter*cosd(objarray(2).pressureAngle))/2
+    pinionAddendumRadius = (objarray(1).pitchDiameter + objarray(1).module)/2;
+    pinionBaseCircleRadius = (objarray(1).pitchDiameter*cosd(objarray(1).pressureAngle))/2;
+    gearAddendumRadius = (objarray(2).pitchDiameter + objarray(2).module)/2;
+    gearBaseCircleRadius = (objarray(2).pitchDiameter*cosd(objarray(2).pressureAngle))/2;
     centerDistance = (objarray(1).numTeeth*objarray(1).module + ...
         objarray(2).numTeeth*objarray(2).module)/2;
-    basePitch = (pi*pinionBaseCircleRadius*2)/objarray(1).numTeeth
-    objarray(i).contactRatio = (sqrt(pinionAddendumRadius^2-pinionBaseCircleRadius^2) + sqrt(gearAddendumRadius^2 - gearBaseCircleRadius^2) - centerDistance*sind(objarray(i).pressureAngle))/bas
-%     (sqrt(((objarray(1).pitchDiameter + ...
-%         objarray(1).module)/2)^2-(objarray(1).pitchDiameter*...
-%         cosd(objarray(1).pressureAngle)/2)^2) + sqrt(((objarray(2).pitchDiameter...
-%         + objarray(2).module)/2)^2 - (objarray(2).pitchDiameter*...
-%         cosd(objarray(2).pressureAngle)/2)^2) - centerDistance*...
-%         objarray(i).pressureAngle)/(pi*objarray(i).numTeeth*...
-%         objarray(i).pitchDiameter*cosd(objarray(i).pressureAngle));
+    basePitch = (pi*pinionBaseCircleRadius*2)/objarray(1).numTeeth;
+    objarray(i).contactRatio = (sqrt(pinionAddendumRadius^2-...
+        pinionBaseCircleRadius^2) + sqrt(gearAddendumRadius^2 - ...
+        gearBaseCircleRadius^2) - centerDistance*...
+        sind(objarray(i).pressureAngle))/basePitch;
 end
 for i = 3:4 % for B2 and C1 set
+    pinionAddendumRadius = (objarray(3).pitchDiameter + objarray(3).module)/2;
+    pinionBaseCircleRadius = (objarray(3).pitchDiameter*cosd(objarray(3).pressureAngle))/2;
+    gearAddendumRadius = (objarray(4).pitchDiameter + objarray(4).module)/2;
+    gearBaseCircleRadius = (objarray(4).pitchDiameter*cosd(objarray(4).pressureAngle))/2;
     centerDistance = (objarray(3).numTeeth*objarray(3).module + ...
         objarray(4).numTeeth*objarray(4).module)/2;
-    objarray(i).contactRatio = (sqrt(((objarray(3).pitchDiameter + ...
-        objarray(3).module)/2)^2-(objarray(3).pitchDiameter*...
-        cosd(objarray(3).pressureAngle)/2)^2) + sqrt(((objarray(4).pitchDiameter...
-        + objarray(4).module)/2)^2 - (objarray(4).pitchDiameter*...
-        cosd(objarray(4).pressureAngle)/2)^2) - centerDistance*...
-        objarray(i).pressureAngle)/(pi*objarray(i).numTeeth*...
-        objarray(i).pitchDiameter*cosd(objarray(i).pressureAngle));
+    basePitch = (pi*pinionBaseCircleRadius*2)/objarray(3).numTeeth;
+    objarray(i).contactRatio = (sqrt(pinionAddendumRadius^2-...
+        pinionBaseCircleRadius^2) + sqrt(gearAddendumRadius^2 - ...
+        gearBaseCircleRadius^2) - centerDistance*...
+        sind(objarray(i).pressureAngle))/basePitch;
 end
 
 % calculate stress cycle factors
@@ -175,7 +172,7 @@ for i = 1:2:3 % for A1 and B2 (pinions)
         ((objarray(i).gearThickness*25.4)*(objarray(i).pitchDiameter*25.4)*...
         objarray(i).pittingGeometryFactor))*((objarray(i).pittingSafetyFactor*...
         objarray(i).temperatureFactor*objarray(i).reliabilityFactor)/...
-        ((objarray(i).contactFatigueLimit/145.038)*objarray(i).hardnessRatioFactor));
+        ((objarray(i).contactFatigueLimit/145.0376)*objarray(i).hardnessRatioFactor));
 end
 for i = 2:2:4 % for B1 and C1 (gears)
     objarray(i).pittingStressCycleFactor = (objarray(i).elasticCoefficient/sqrt(145.038))*...
@@ -193,7 +190,7 @@ for i = 1:4
         objarray(i).loadDistribFactor*objarray(i).sizeFactor*...
         objarray(i).rimThicknessFactor*objarray(i).bendingSafetyFactor*...
         objarray(i).temperatureFactor*objarray(i).reliabilityFactor)/...
-        ((objarray(i).bendingFatigueLimit/145.038)*(objarray(i).gearThickness*25.4)*...
+        ((objarray(i).bendingFatigueLimit/145.037)*(objarray(i).gearThickness*25.4)*...
         (objarray(i).module*25.4)*objarray(i).bendingGeometryFactor);
 end
 
@@ -235,6 +232,6 @@ gearBox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.ki
 % find gearbox lifetime
 gearBox.lifetime = min([objarray.bendingStressLifetime, objarray.contactStressLifetime]);
 
-calculations = [gearBox.totalKE, gearBox.lifetime];
+calculations = [gearBox.totalKE, gearBox.lifetime, A1.contactRatio, B2.contactRatio];
 
 end

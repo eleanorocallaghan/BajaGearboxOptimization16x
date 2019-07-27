@@ -1,18 +1,18 @@
-function [topTwentyNoKE] = Optimization()
+function [totalTries, topTwentyNoKE] = Optimization()
 
 % min and max values
 minNumTeeth = 10;
 maxNumTeeth = 75;
-minIndividualRatio = 1.5;
-maxIndividualRatio = 3;
 minOverallRatio = 7.05;
 maxOverallRatio = 7.15;
+minIndividualRatio = 1.5;
+maxIndividualRatio = 2.8;
 minPitchDiameter = 2; %in
 maxPitchDiameter = 8; %in
 maxGearThickness = 1; %in
 thicknessIncrement = 0.05; %in
-idealLifetime = 40; %hours
-minContactRatio = 1.125;
+idealLifetime = 12; %hours
+minContactRatio = 1.2;
 
 % generate possible combinations of teeth
 % find all combinations of teeth numbers
@@ -70,7 +70,7 @@ for i = 1:size(teethOptions, 1)
         count4 = count4 + 1;
     end
 end
-allDiametralPitchOptions = round(allDiametralPitchOptions, 1);
+allDiametralPitchOptions = round(allDiametralPitchOptions, 0);
 diametralPitchOptions = unique(sort(allDiametralPitchOptions, 2), 'rows');
 
 count5 = 1;
@@ -119,5 +119,11 @@ labels = {'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16'
 text(min(topTwenty(:, 8), topTwenty(:, 9)),topTwenty(:, 10),labels,'VerticalAlignment','bottom','HorizontalAlignment','right')
 
 topTwentyNoKE = topTwenty(:, 1:9);
+% teeth = [round(topTwentyNoKE(:, 1:4), 0)]
+% pressureAngle = [round(topTwentyNoKE(:, 5), 1)]
+% diametralPitch = [round(topTwentyNoKE(:, 6), 0)]
+% thickness = [round(topTwentyNoKE(:, 7), 2)]
+% contactRatio = [topTwentyNoKE(:, 8:9)]
+% topTwentyNoKE = [teeth pressureAngle thickness diametralPitch contactRatio];
 
 end

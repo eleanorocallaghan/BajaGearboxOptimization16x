@@ -12,17 +12,17 @@ values = num2cell(possibleGearbox(1:4));
 [objarray.diametralPitch] = deal(possibleGearbox(6));
 [objarray.pressureAngle] = deal(possibleGearbox(5));
 [objarray.gearThickness] = deal(possibleGearbox(7));
-[objarray.materialName] = deal(61); %FIX MEEEE
+[objarray.materialName] = deal(9310); %FIX MEEEE
 
 
 % % IF YOU WANT TO MANUALLY PUT STUFF IN
 % % initialize optimized values for gears
-% values = num2cell([25 66 25 67]);
+% values = num2cell([15 41 21 55]);
 % [objarray.numTeeth] = values{:};
-% [objarray.diametralPitch] = deal(12.4);
-% [objarray.pressureAngle] = deal(14.5);
-% [objarray.gearThickness] = deal(0.5);
-% [objarray.materialName] = deal(4150); %FIX MEEEE
+% [objarray.diametralPitch] = deal(12);
+% [objarray.pressureAngle] = deal(25);
+% [objarray.gearThickness] = deal(0.535);
+% [objarray.materialName] = deal(9310); %FIX MEEEE
 
 
 % initialize gearbox stuff
@@ -45,8 +45,8 @@ values = num2cell([2484 2300 2484 2300]);
 [objarray.pittingSafetyFactor] = deal(1); % from website about fatigue life
 [objarray.temperatureFactor] = deal(1); % unless we get more data
 [objarray.reliabilityFactor] = deal(1.25); % from website about fatigue life
-[objarray.bendingFatigueLimit] = deal(objarray(1).ultimateTensile); %FIX MEEEE
-[objarray.contactFatigueLimit] = deal(objarray(1).ultimateTensile); % a reasonable guess, should be fixed though
+[objarray.bendingFatigueLimit] = deal(objarray(1).ultimateTensile); 
+[objarray.contactFatigueLimit] = deal(objarray(1).ultimateTensile); 
 [objarray.numLoadApplication] = deal(1); % ^
 [objarray.bendingGeometryFactor] = deal(0.47); % this is an approximation, should probably be calculated
 
@@ -137,9 +137,9 @@ end
 
 % calculate contact ratios
 for i = 1:2 % for A1 and B1 set
-    pinionAddendumRadius = (objarray(1).pitchDiameter + objarray(1).module)/2;
+    pinionAddendumRadius = (objarray(1).pitchDiameter/2) + objarray(1).module;
     pinionBaseCircleRadius = (objarray(1).pitchDiameter*cosd(objarray(1).pressureAngle))/2;
-    gearAddendumRadius = (objarray(2).pitchDiameter + objarray(2).module)/2;
+    gearAddendumRadius = (objarray(2).pitchDiameter/2) + objarray(2).module;
     gearBaseCircleRadius = (objarray(2).pitchDiameter*cosd(objarray(2).pressureAngle))/2;
     centerDistance = (objarray(1).numTeeth*objarray(1).module + ...
         objarray(2).numTeeth*objarray(2).module)/2;
@@ -150,9 +150,9 @@ for i = 1:2 % for A1 and B1 set
         sind(objarray(i).pressureAngle))/basePitch;
 end
 for i = 3:4 % for B2 and C1 set
-    pinionAddendumRadius = (objarray(3).pitchDiameter + objarray(3).module)/2;
+    pinionAddendumRadius = (objarray(3).pitchDiameter/2) + objarray(3).module;
     pinionBaseCircleRadius = (objarray(3).pitchDiameter*cosd(objarray(3).pressureAngle))/2;
-    gearAddendumRadius = (objarray(4).pitchDiameter + objarray(4).module)/2;
+    gearAddendumRadius = (objarray(4).pitchDiameter/2) + objarray(4).module;
     gearBaseCircleRadius = (objarray(4).pitchDiameter*cosd(objarray(4).pressureAngle))/2;
     centerDistance = (objarray(3).numTeeth*objarray(3).module + ...
         objarray(4).numTeeth*objarray(4).module)/2;

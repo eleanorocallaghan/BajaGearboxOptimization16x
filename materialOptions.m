@@ -7,7 +7,7 @@ if name == 4150
 elseif name == 9310
     density = 0.281793;
     hardness = 264;
-    ultimateTensile = 130534; 
+    ultimateTensile = 217000;%130534; 
 elseif name == 61 %Ferrium C61
     density = .28; %IDK what this actually is
     hardness = 627;
@@ -16,7 +16,7 @@ elseif name == 53 %Pyrowear alloy 53
     density = 1;
     hardness = 627;
    % ultimateTensile = 
-elseif name == 
+%%elseif name == 
 end
 
 end
