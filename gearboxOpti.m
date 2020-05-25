@@ -9,19 +9,23 @@ end
 % initialize optimized values for gears
 values = num2cell(possibleGearbox(1:4));
 [objarray.numTeeth] = values{:};
-[objarray.diametralPitch] = deal(possibleGearbox(6));
+[objarray(1:2).diametralPitch] = deal(possibleGearbox(6));
+[objarray(3:4).diametralPitch] = deal(possibleGearbox(7));
 [objarray.pressureAngle] = deal(possibleGearbox(5));
-[objarray.gearThickness] = deal(possibleGearbox(7));
+[objarray(1:2).gearThickness] = deal(possibleGearbox(8));
+[objarray(3:4).gearThickness] = deal(possibleGearbox(9));
 [objarray.materialName] = deal(9310); %FIX MEEEE
 
 
 % % IF YOU WANT TO MANUALLY PUT STUFF IN
 % % initialize optimized values for gears
-% values = num2cell([15 41 21 55]);
+% values = num2cell([25 74 23 62]);
 % [objarray.numTeeth] = values{:};
-% [objarray.diametralPitch] = deal(12);
+% [objarray(1:2).diametralPitch] = deal(13);
+% [objarray(3:4).diametralPitch] = deal(15);
 % [objarray.pressureAngle] = deal(25);
-% [objarray.gearThickness] = deal(0.535);
+% [objarray(1:2).gearThickness] = deal(0.4);
+% [objarray(3:4).gearThickness] = deal(0.5);
 % [objarray.materialName] = deal(9310); %FIX MEEEE
 
 
@@ -45,8 +49,8 @@ values = num2cell([2484 2300 2484 2300]);
 [objarray.pittingSafetyFactor] = deal(1); % from website about fatigue life
 [objarray.temperatureFactor] = deal(1); % unless we get more data
 [objarray.reliabilityFactor] = deal(1.25); % from website about fatigue life
-[objarray.bendingFatigueLimit] = deal(objarray(1).ultimateTensile); 
-[objarray.contactFatigueLimit] = deal(objarray(1).ultimateTensile); 
+[objarray.bendingFatigueLimit] = deal(217846); 
+[objarray.contactFatigueLimit] = deal(217846); 
 [objarray.numLoadApplication] = deal(1); % ^
 [objarray.bendingGeometryFactor] = deal(0.47); % this is an approximation, should probably be calculated
 
@@ -141,12 +145,12 @@ for i = 1:2 % for A1 and B1 set
     pinionBaseCircleRadius = (objarray(1).pitchDiameter*cosd(objarray(1).pressureAngle))/2;
     gearAddendumRadius = (objarray(2).pitchDiameter/2) + objarray(2).module;
     gearBaseCircleRadius = (objarray(2).pitchDiameter*cosd(objarray(2).pressureAngle))/2;
-    centerDistance = (objarray(1).numTeeth*objarray(1).module + ...
+    centerDistance1 = (objarray(1).numTeeth*objarray(1).module + ...
         objarray(2).numTeeth*objarray(2).module)/2;
     basePitch = (pi*pinionBaseCircleRadius*2)/objarray(1).numTeeth;
     objarray(i).contactRatio = (sqrt(pinionAddendumRadius^2-...
         pinionBaseCircleRadius^2) + sqrt(gearAddendumRadius^2 - ...
-        gearBaseCircleRadius^2) - centerDistance*...
+        gearBaseCircleRadius^2) - centerDistance1*...
         sind(objarray(i).pressureAngle))/basePitch;
 end
 for i = 3:4 % for B2 and C1 set
@@ -154,12 +158,12 @@ for i = 3:4 % for B2 and C1 set
     pinionBaseCircleRadius = (objarray(3).pitchDiameter*cosd(objarray(3).pressureAngle))/2;
     gearAddendumRadius = (objarray(4).pitchDiameter/2) + objarray(4).module;
     gearBaseCircleRadius = (objarray(4).pitchDiameter*cosd(objarray(4).pressureAngle))/2;
-    centerDistance = (objarray(3).numTeeth*objarray(3).module + ...
+    centerDistance2 = (objarray(3).numTeeth*objarray(3).module + ...
         objarray(4).numTeeth*objarray(4).module)/2;
     basePitch = (pi*pinionBaseCircleRadius*2)/objarray(3).numTeeth;
     objarray(i).contactRatio = (sqrt(pinionAddendumRadius^2-...
         pinionBaseCircleRadius^2) + sqrt(gearAddendumRadius^2 - ...
-        gearBaseCircleRadius^2) - centerDistance*...
+        gearBaseCircleRadius^2) - centerDistance2*...
         sind(objarray(i).pressureAngle))/basePitch;
 end
 
@@ -226,12 +230,15 @@ B1 = objarray(2);
 B2 = objarray(3);
 C1 = objarray(4);
 
+inputToOutput = centerDistance1 + centerDistance2;
+
 % total KE
 gearBox.totalKE = A1.kineticEnergy + B1.kineticEnergy + B2.kineticEnergy + C1.kineticEnergy;
 
 % find gearbox lifetime
-gearBox.lifetime = min([objarray.bendingStressLifetime, objarray.contactStressLifetime]);
+A1B1lifetime = min([A1.bendingStressLifetime, B1.bendingStressLifetime, A1.contactStressLifetime, B1.contactStressLifetime]);
+B2C1lifetime = min([B2.bendingStressLifetime, C1.bendingStressLifetime, B2.contactStressLifetime, C1.contactStressLifetime]);
+gearBox.lifetime = min([A1B1lifetime, B2C1lifetime]);
 
-calculations = [gearBox.totalKE, gearBox.lifetime, A1.contactRatio, B2.contactRatio];
-
+calculations = [gearBox.totalKE, gearBox.lifetime, A1B1lifetime, B2C1lifetime, A1.contactRatio, B2.contactRatio, inputToOutput, centerDistance2];
 end

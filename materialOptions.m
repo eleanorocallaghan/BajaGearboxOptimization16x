@@ -5,7 +5,7 @@ if name == 4150
     hardness = 314; %Brinell
     ultimateTensile = 159541.5; %psi
 elseif name == 9310
-    density = 0.281793;
+    density = 0.282;
     hardness = 264;
     ultimateTensile = 217000;%130534; 
 elseif name == 61 %Ferrium C61
