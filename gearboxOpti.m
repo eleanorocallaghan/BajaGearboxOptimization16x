@@ -1,6 +1,5 @@
 function [A1, B1, B2, C1, gearBox, calculations] = gearboxOpti (possibleGearbox)
 
-
 % make a matrix of gears
 for i = 1:4
   objarray(i) = gear;
